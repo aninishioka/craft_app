@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from flask import Flask, g, redirect, render_template, session, flash
 from sqlalchemy.exc import IntegrityError
 from models import db, connect_db, User, Project
-from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm
+from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm, EditProjectForm
 from functools import wraps
 
 
@@ -169,11 +169,28 @@ def user_page(user_id):
     return render_template('users/profile.html', user=user)
 
 
-@app.routes('/users/profile', methods=['GET', 'POST'])
+@app.route('/users/profile', methods=['GET', 'POST'])
 @login_required
 def edit_user():
     # TODO:
     return
+
+@app.post('/users/delete')
+@login_required
+def delete_user():
+    """Handle deleting user."""
+
+    form = g.csrf_form
+
+    if not form.validate_on_submit():
+        flash('Unathorized', 'danger')
+        return redirect("/")
+
+    db.session.delete(g.user)
+    db.session.commit()
+
+    flash('User deleted', 'success')
+    return redirect(f'/signup')
 
 
 ##############################################################################
@@ -201,7 +218,7 @@ def add_project():
         db.session.add(project)
         db.session.commit()
 
-        flash('New project added')
+        flash('New project added', 'success')
         return redirect(f'/users/{g.user.id}')
 
     return render_template('projects/create.html', form=form)
@@ -216,3 +233,49 @@ def project_details(project_id):
 
     return render_template('projects/details.html', project=project)
 
+
+@app.route('/projects/<int:project_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_project(project_id):
+    """Handle editing project.
+    If GET, show form.
+    If form submission valid, update DB and redirect to user's profile"""
+
+    project = Project.query.get_or_404(project_id)
+
+    form = EditProjectForm(obj=project)
+
+    if g.user.id == project.user.id and form.validate_on_submit():
+        project.title = form.title.data or None
+        project.pattern = form.pattern.data
+        project.designer = form.designer.data
+        project.needles = form.needles.data
+        project.content = form.content.data
+
+        db.session.commit()
+
+        flash('Project edited.', 'success')
+        return redirect(f'/users/{g.user.id}')
+
+    return render_template('projects/edit.html', form=form, project_id=project.id)
+
+
+@app.post('/projects/<int:project_id>/delete')
+@login_required
+def delete_project(project_id):
+    """Handle deleting project."""
+
+    project = Project.query.get_or_404(project_id)
+
+    form = g.csrf_form
+
+    if g.user.id != project.user.id and not form.validate_on_submit():
+        flash('Unathorized', 'danger')
+        return redirect("/")
+
+
+    db.session.delete(project)
+    db.session.commit()
+
+    flash('Project deleted', 'success')
+    return redirect(f'/users/{g.user.id}')

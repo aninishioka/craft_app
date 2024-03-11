@@ -1,0 +1,10 @@
+{% macro create_project_card(project) %}
+<div class="col-lg-3 col-md-6 col-12 mt-2">
+    <div class="card project-card">
+      <div class="card-body">
+        <h5 class="card-title">{{ project.title }}</h5>
+        <a href="/projects/{{project.id}}" class="stretched-link"></a>
+      </div>
+    </div>
+</div>
+{% endmacro %}

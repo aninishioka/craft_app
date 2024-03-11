@@ -71,3 +71,31 @@ class NewProjectForm(FlaskForm):
         "Notes",
         validators=[Optional()]
     )
+
+class EditProjectForm(FlaskForm):
+    """Form to edit a project."""
+
+    title = StringField(
+        "Title",
+        validators=[Optional(), Length(max=100)],
+    )
+
+    pattern = StringField(
+        "Pattern Name",
+        validators=[Optional(), Length(max=100)]
+    )
+
+    designer = StringField(
+        "Pattern designer",
+        validators=[Optional(), Length(max=100)]
+    )
+
+    needles = StringField(
+        "Needles",
+        validators=[Optional(), Length(max=50)]
+    )
+
+    content = TextAreaField(
+        "Notes",
+        validators=[Optional()]
+    )

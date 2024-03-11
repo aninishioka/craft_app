@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+  {% if g.user.id == project.user.id %}
+  <form>
+    {{ g.csrf_form.hidden_tag() }}
+    <button formaction="/projects/{{project.id}}/edit" class="btn btn-secondary mb-5">
+      Edit
+    </button>
+    <button formaction="/projects/{{project.id}}/delete" formmethod="POST" class="btn btn-danger mb-5">
+      Delete
+    </button>
+</form>
+  {% endif %}
+
+  <h1 class="mb-5">{{ project.title }}</h1>
+
+  {% if project.pattern %}
+  <h2>Pattern:</h2>
+  <p>
+    {{ project.pattern }}
+    {% if project.designer %} by {{ project.designer }} {% endif %}
+  </p>
+  {% endif %}
+
+  {% if project.yarns or project.needles %}
+  <h2>Materials:</h2>
+  {% if project.needles %}
+  <p>Needles {{ project.needles }}</p>
+  {% endif %}
+  {% endif %}
+
+  <h2>Notes:</h2>
+  <p>{{ project.content }}</p>
+</div>
+
+{% endblock %}

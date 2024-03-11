@@ -5,11 +5,20 @@
 
 <div class="container">
   {% if g.user.id == user.id %}
-  <a href="/projects/new" class="btn btn-secondary mb-2">Add Project</a>
+  <form>
+    {{ g.csrf_form.hidden_tag() }}
+    <button formaction="/projects/new" class="btn btn-secondary mb-2">
+      Add Project
+    </button>
+    <button formaction="/users/delete" formmethod="POST" class="btn btn-danger mb-2">
+      Delete User
+    </button>
+  </form>
+
   {% endif %}
   <div class="row">
     {% for project in user.projects %}
-      {{ create_project_card(project) }}
+    {{ create_project_card(project) }}
     {% endfor %}
   </div>
 </div>
