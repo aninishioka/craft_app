@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crafty</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/bootstrap@5/dist/css/bootstrap.css">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a href="/" class="navbar-brand">
+        Crafty
+      </a>
+      <div class="navbar-nav">
+        {% if not g.user%}
+        <a href="/signup" class="nav-link">Sign up</a>
+        <a href="/login" class="nav-link">Log in</a>
+        {% else %}
+        <a href="/users/{{g.user.id}}" class="nav-link">Profile</a>
+        <form action="/logout" method="POST">
+          {{ g.csrf_form.hidden_tag() }}
+          <button type="submit" class="btn btn-outline-secondary">Log out</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  {% for category, message in get_flashed_messages(with_categories=True) %}
+  <div class="alert alert-{{category}}" role="alert">
+    {{message}}
+  </div>
+  {% endfor %}
+
+  {% block content %}
+
+  {% endblock %}
+
+</body>
+
+</html>
