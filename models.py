@@ -77,16 +77,24 @@ class User(db.Model):
 
         return False
 
+    projects = db.relationship('Project', backref='user')
 
-class Note(db.Model):
+
+class Project(db.Model):
     """Note written by user."""
 
-    __tablename__ = 'notes'
+    __tablename__ = 'projects'
 
     id = db.Column(
         db.Integer,
         primary_key=True,
         autoincrement=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete='CASCADE'),
+        nullable=False
     )
 
     title = db.Column(
@@ -125,6 +133,8 @@ class Note(db.Model):
         nullable=False
     )
 
+    yarns = db.relationship('Yarn', backref='project')
+
 
 class Yarn(db.Model):
     """Yarn details."""
@@ -136,6 +146,18 @@ class Yarn(db.Model):
         primary_key=True,
         autoincrement=True
     )
+
+    project_id = db.Column(
+        db.Integer,
+        db.ForeignKey('projects.id', ondelete='CASCADE'),
+        nullable=False
+    )
+
+    # user_id = db.Column(
+    #     db.Integer,
+    #     db.ForeignKey('user.id', ondelete='CASCADE'),
+    #     nullable=False
+    # )
 
     name = db.Column(
         db.String(100),
@@ -178,40 +200,58 @@ class Yarn(db.Model):
     )
 
 
-class Gauge(db.Model):
-    """Gauge details."""
+# class Gauge(db.Model):
+#     """Gauge details."""
 
-    ___tablename__ = 'gauges'
+#     ___tablename__ = 'gauges'
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True,
-        autoincrement=True
-    )
+#     id = db.Column(
+#         db.Integer,
+#         primary_key=True,
+#         autoincrement=True
+#     )
 
-    height = db.Column(
-        db.Integer,
-        nullable=False,
-        default=0
-    )
+#     note_id = db.Column(
+#         db.Integer,
+#         db.ForeignKey('note.id', ondelete='CASCADE'),
+#         nullable=False
+#     )
 
-    width = db.Column(
-        db.Integer,
-        nullable=False,
-        default=0
-    )
+#     user_id = db.Column(
+#         db.Integer,
+#         db.ForeignKey('user.id', ondelete='CASCADE'),
+#         nullable=False
+#     )
 
-    rows = db.Column(
-        db.Integer,
-        nullable=False,
-        default=0
-    )
+#     height = db.Column(
+#         db.Integer,
+#         nullable=False,
+#         default=0
+#     )
 
-    column = db.Column(
-        db.Integer,
-        nullable=False,
-        default=0
-    )
+#     width = db.Column(
+#         db.Integer,
+#         nullable=False,
+#         default=0
+#     )
+
+#     unit = db.Column(
+#         db.String(10),
+#         nullable=False,
+#         default='in'
+#     )
+
+#     rows = db.Column(
+#         db.Integer,
+#         nullable=False,
+#         default=0
+#     )
+
+#     column = db.Column(
+#         db.Integer,
+#         nullable=False,
+#         default=0
+#     )
 
 
 def connect_db(app):
