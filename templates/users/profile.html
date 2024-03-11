@@ -1,7 +1,18 @@
 {% extends 'base.html' %}
+{% from 'projects/card.html' import create_project_card %}
 
 {% block content %}
 
-{{ user.username }}
+<div class="container">
+  {% if g.user.id == user.id %}
+  <a href="/projects/new" class="btn btn-secondary mb-2">Add Project</a>
+  {% endif %}
+  <div class="row">
+    {% for project in user.projects %}
+      {{ create_project_card(project) }}
+    {% endfor %}
+  </div>
+</div>
+
 
 {% endblock %}

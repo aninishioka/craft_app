@@ -100,11 +100,11 @@ class Project(db.Model):
     title = db.Column(
         db.String(100),
         nullable=False,
-        default='New Note'
+        default='New Project'
     )
 
     pattern = db.Column(
-        db.String(150),
+        db.String(100),
         nullable=False,
         default=''
     )

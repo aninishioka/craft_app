@@ -2,8 +2,8 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, g, redirect, render_template, session, flash
 from sqlalchemy.exc import IntegrityError
-from models import db, connect_db, User
-from forms import CSRFProtectForm, SignupForm, LoginForm
+from models import db, connect_db, User, Project
+from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm
 from functools import wraps
 
 
@@ -167,3 +167,52 @@ def user_page(user_id):
     user = User.query.get_or_404(user_id)
 
     return render_template('users/profile.html', user=user)
+
+
+@app.routes('/users/profile', methods=['GET', 'POST'])
+@login_required
+def edit_user():
+    # TODO:
+    return
+
+
+##############################################################################
+# Project routes:
+
+@app.route('/projects/new', methods=['POST', 'GET'])
+@login_required
+def add_project():
+    """Handle new project creation.
+    If GET, show form.
+    If form submission valid, update DB and redirect to user's profile."""
+
+    form = NewProjectForm()
+
+    if form.validate_on_submit():
+        project = Project(
+            user_id = g.user.id,
+            title = form.title.data or form.pattern.data or None,
+            pattern = form.pattern.data,
+            designer = form.designer.data,
+            needles = form.needles.data,
+            content = form.content.data
+        )
+
+        db.session.add(project)
+        db.session.commit()
+
+        flash('New project added')
+        return redirect(f'/users/{g.user.id}')
+
+    return render_template('projects/create.html', form=form)
+
+
+@app.get('/projects/<int:project_id>')
+@login_required
+def project_details(project_id):
+    """Show project details."""
+
+    project = Project.query.get_or_404(project_id)
+
+    return render_template('projects/details.html', project=project)
+
