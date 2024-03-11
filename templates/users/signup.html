@@ -2,17 +2,21 @@
 
 {% block content %}
 
-<form action="/signup" method="POST">
-  {{ form.hidden_tag() }}
+<div class="d-flex justify-content-center">
+  <div class="col-md-7 col-lg-5">
+    <form action="/signup" method="POST">
+      {{ form.hidden_tag() }}
 
-  {% for field in form if field.widget.input_type != 'hidden' %}
-    {% for error in field.errors %}
+      {% for field in form if field.widget.input_type != 'hidden' %}
+      {% for error in field.errors %}
       <span class="text-danger">{{ error }}</span>
-    {% endfor %}
-    {{ field(placeholder=field.label.text, class="form-control") }}
-  {% endfor %}
+      {% endfor %}
+      {{ field(placeholder=field.label.text, class="form-control mb-3") }}
+      {% endfor %}
 
-  <button class="btn btn-primary">Sign up</button>
-</form>
+      <button class="btn btn-primary">Sign up</button>
+    </form>
+  </div>
+</div>
 
 {% endblock %}
