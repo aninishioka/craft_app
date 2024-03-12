@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, TextAreaField
-from wtforms.validators import InputRequired, Length, Email, Optional, URL
+from wtforms import StringField, PasswordField, TextAreaField, IntegerField, SelectField, FieldList, FormField, Form, SubmitField
+from wtforms.validators import InputRequired, Length, Email, Optional, URL, NumberRange
 
 
 class CSRFProtectForm(FlaskForm):
@@ -44,6 +44,174 @@ class LoginForm(FlaskForm):
     )
 
 
+class YarnForm(Form):
+    """Form to add yarn to project."""
+
+    name = StringField(
+        "Yarn Name",
+        validators=[Optional(), Length(max=100)]
+    )
+
+    color = StringField(
+        "Color",
+        validators=[Optional(), Length(max=100)]
+    )
+
+    dye_lot = StringField(
+        "Dye lot",
+        validators=[Optional(), Length(max=20)]
+    )
+
+    weight = SelectField(
+        "Weight",
+        choices=[
+            ('lace', 'Lace'),
+            ('super_fine', 'Super Fine'),
+            ('fine', 'Fine'),
+            ('light', 'Light'),
+            ('medium', 'Medium'),
+            ('bulky', 'Bulky'),
+            ('super_bulky', 'Super Bulky'),
+            ('jumbo', 'Jumbo')
+        ],
+        validators=[Optional()]
+    )
+
+    skein_weight = IntegerField(
+        "Skein weight",
+        validators=[Optional(), NumberRange(min=0)]
+    )
+
+    skein_weight_unit = SelectField(
+        "Skein weight unit",
+        choices=[('grams', 'grams'), ('ounces', 'ounces')]
+    )
+
+    skein_length = IntegerField(
+        "Skein length",
+        validators=[Optional(), NumberRange(min=0)]
+    )
+
+    skein_length_unit = SelectField(
+        "Skein length unit",
+        choices=[('yards', 'yards'), ('meters', 'meters')]
+    )
+
+    num_skeins = IntegerField(
+        "Number of Skeins",
+        validators=[Optional(), NumberRange(min=0)]
+    )
+
+    delete = SubmitField(
+        "Remove yarn"
+    )
+
+
+class NeedleForm(Form):
+    """Form to add needles to project."""
+
+    size = SelectField(
+        'Needle size',
+        choices=[
+            ('US 00000000 - 0.5 mm', 'US 00000000 - 0.5 mm'),
+            ('US 000000 - 0.75 mm', 'US 000000 - 0.75 mm'),
+            ('US 00000 - 1.0 mm', 'US 00000 - 1.0 mm'),
+            ('US 0000 - 1.25 mm', 'US 0000 - 1.25 mm'),
+            ('US 000 - 1.5 mm', 'US 000 - 1.5 mm'),
+            ('US 00 - 1.75 mm', 'US 00 - 1.75 mm'),
+            ('US 0 - 2.0 mm', 'US 0 - 2.0 mm'),
+            ('US 1 - 2.25 mm', 'US 1 - 2.25 mm'),
+            ('US 1.5 - 2.5 mm', 'US 1.5 - 2.5 mm'),
+            ('US 2 - 2.75 mm', 'US 2 - 2.75 mm'),
+            ('US 2.5 - 3.0 mm', 'US 2.5 - 3.0 mm'),
+            ('US 3 - 3.25 mm', 'US 3 - 3.25 mm'),
+            ('US 4 - 3.5 mm', 'US 4 - 3.5 mm'),
+            ('US 5 - 3.75 mm', 'US 5 - 3.75 mm'),
+            ('US 6 - 4.0 mm', 'US 6 - 4.0 mm'),
+            ('4.25 mm', '4.25 mm'),
+            ('US 7 - 4.5 mm', 'US 7 - 4.5 mm'),
+            ('4.75 mm', '4.75 mm'),
+            ('US 8 - 5.0 mm', 'US 8 - 5.0 mm'),
+            ('US 9 - 5.5 mm', 'US 9 - 5.5 mm'),
+            ('US 10 - 6.0 mm', 'US 10 - 6.0 mm'),
+            ('US 10.5 - 6.5 mm', 'US 10.5 - 6.5 mm'),
+            ('7.0 mm', '7.0 mm'),
+            ('7.5 mm', '7.5 mm'),
+            ('US 11 - 8.0 mm', 'US 11 - 8.0 mm'),
+            ('US 13 - 9.0 mm', 'US 13 - 9.0 mm'),
+            ('US 15 - 10.0 mm', 'US 15 - 10.0 mm'),
+            ('US 17 - 12.0 mm', 'US 17 - 12.0 mm'),
+            ('US 19 - 15.0 mm', 'US 19 - 15.0 mm'),
+            ('US 35 - 19.0 mm', 'US 35 - 19.0 mm'),
+            ('US 50 - 25.0 mm', 'US 50 - 25.0 mm')
+        ]
+    )
+
+    delete = SubmitField(
+        "Remove needle"
+    )
+
+
+class HookForm(Form):
+    """Form to add hooks to project."""
+
+    size = SelectField(
+        'Hook size',
+        choices=[
+            ('0.6 mm', '0.6 mm'),
+            ('0.7 mm', '0.7 mm'),
+            ('0.75 mm', '0.75 mm'),
+            ('0.85 mm', '0.85 mm'),
+            ('0.9 mm', '0.9 mm'),
+            ('1.0 mm', '1.0 mm'),
+            ('1.05 mm', '1.05 mm'),
+            ('1.1 mm', '1.1 mm'),
+            ('1.15 mm', '1.15 mm'),
+            ('1.25 mm', '1.25 mm'),
+            ('1.3 mm', '1.3 mm'),
+            ('1.4 mm', '1.4 mm'),
+            ('1.5 mm', '1.5 mm'),
+            ('1.65 mm', '1.65 mm'),
+            ('1.75 mm', '1.75 mm'),
+            ('1.8 mm', '1.8 mm'),
+            ('1.9 mm', '1.9 mm'),
+            ('2.0 mm', '2.0 mm'),
+            ('2.1 mm', '2.1 mm'),
+            ('2.25 mm (B)', '2.25 mm (B)'),
+            ('2.35 mm', '2.35 mm'),
+            ('2.5 mm', '2.5 mm'),
+            ('2.75 mm (C)', '2.75 mm (C)'),
+            ('3.0 mm', '3.0 mm'),
+            ('3.25 mm (D)', '3.25 mm (D)'),
+            ('3.5 mm (E)', '3.5 mm (E)'),
+            ('3.75 mm (F)', '3.75 mm (F)'),
+            ('4.0 mm (G)', '4.0 mm (G)'),
+            ('4.25 mm (G)', '4.25 mm (G)'),
+            ('4.5 mm', '4.5 mm'),
+            ('5.0 mm (H)', '5.0 mm (H)'),
+            ('5.5 mm (I)', '5.5 mm (I)'),
+            ('6.0 mm (J)', '6.0 mm (J)'),
+            ('6.5 mm (K)', '6.5 mm (K)'),
+            ('7.0 mm', '7.0 mm'),
+            ('7.5 mm', '7.5 mm'),
+            ('8.0 mm (L)', '8.0 mm (L)'),
+            ('9.0 mm (M/N)', '9.0 mm (M/N)'),
+            ('10.0 mm (N/P)', '10.0 mm (N/P)'),
+            ('11.5 mm (P)', '11.5 mm (P)'),
+            ('12.0 mm', '12.0 mm'),
+            ('15.0 mm (P/Q)', '15.0 mm (P/Q)'),
+            ('15.75 mm (Q)', '15.75 mm (Q)'),
+            ('19.0 mm (S)', '19.0 mm (S)'),
+            ('25.0 mm', '25.0 mm'),
+            ('40.0 mm', '40.0 mm')
+        ]
+    )
+
+    delete = SubmitField(
+        "Remove hook"
+    )
+
+
 class NewProjectForm(FlaskForm):
     """Form to add new project."""
 
@@ -62,9 +230,28 @@ class NewProjectForm(FlaskForm):
         validators=[Optional(), Length(max=100)]
     )
 
-    needles = StringField(
-        "Needles",
-        validators=[Optional(), Length(max=50)]
+    needles = FieldList(
+        FormField(NeedleForm)
+    )
+
+    add_needles = SubmitField(
+        "Add needles"
+    )
+
+    hooks = FieldList(
+        FormField(HookForm)
+    )
+
+    add_hooks = SubmitField(
+        "Add hooks"
+    )
+
+    yarns = FieldList(
+        FormField(YarnForm)
+    )
+
+    add_yarn = SubmitField(
+        "Add yarn"
     )
 
     content = TextAreaField(
@@ -72,30 +259,39 @@ class NewProjectForm(FlaskForm):
         validators=[Optional()]
     )
 
-class EditProjectForm(FlaskForm):
+
+class EditProjectForm(NewProjectForm):
     """Form to edit a project."""
 
-    title = StringField(
-        "Title",
-        validators=[Optional(), Length(max=100)],
-    )
 
-    pattern = StringField(
-        "Pattern Name",
-        validators=[Optional(), Length(max=100)]
-    )
+# class EditProjectForm(FlaskForm):
+#     """Form to edit a project."""
 
-    designer = StringField(
-        "Pattern designer",
-        validators=[Optional(), Length(max=100)]
-    )
+#     title = StringField(
+#         "Title",
+#         validators=[Optional(), Length(max=100)],
+#     )
 
-    needles = StringField(
-        "Needles",
-        validators=[Optional(), Length(max=50)]
-    )
+#     pattern = StringField(
+#         "Pattern Name",
+#         validators=[Optional(), Length(max=100)]
+#     )
 
-    content = TextAreaField(
-        "Notes",
-        validators=[Optional()]
-    )
+#     designer = StringField(
+#         "Pattern designer",
+#         validators=[Optional(), Length(max=100)]
+#     )
+
+#     needles = StringField(
+#         "Needles",
+#         validators=[Optional(), Length(max=50)]
+#     )
+
+#     yarns = FieldList(
+#         FormField(YarnForm)
+#     )
+
+#     content = TextAreaField(
+#         "Notes",
+#         validators=[Optional()]
+#     )

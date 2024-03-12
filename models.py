@@ -153,16 +153,9 @@ class Yarn(db.Model):
         nullable=False
     )
 
-    # user_id = db.Column(
-    #     db.Integer,
-    #     db.ForeignKey('user.id', ondelete='CASCADE'),
-    #     nullable=False
-    # )
-
     name = db.Column(
         db.String(100),
-        nullable=False,
-        default=''
+        nullable=False
     )
 
     color = db.Column(
@@ -172,7 +165,7 @@ class Yarn(db.Model):
     )
 
     dye_lot = db.Column(
-        db.String(100),
+        db.String(20),
         nullable=False,
         default=''
     )
@@ -183,22 +176,43 @@ class Yarn(db.Model):
         default=''
     )
 
-    amount_weight = db.Column(
+    skein_weight = db.Column(
         db.Integer
     )
 
-    amount_weight_unit = db.Column(
+    skein_weight_unit = db.Column(
         db.String(10)
     )
 
-    length = db.Column(
+    skein_length = db.Column(
         db.Integer
     )
 
-    length_unit = db.Column(
+    skein_length_unit = db.Column(
         db.String(10)
     )
 
+
+class Needle(db.Model):
+    """Needle sizes."""
+
+    __tablename__ = 'needles'
+
+    size = db.Column(
+        db.String(20),
+        primary_key=True
+    )
+
+
+class Hook(db.Model):
+    """Hook sizes."""
+
+    __tablename__ = 'hooks'
+
+    size = db.Column(
+        db.String(20),
+        primary_key=True
+    )
 
 # class Gauge(db.Model):
 #     """Gauge details."""

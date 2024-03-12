@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from models import db, connect_db, User, Project
 from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm, EditProjectForm
 from functools import wraps
+from utils import removeFieldListEntry
 
 
 load_dotenv()
@@ -205,14 +206,32 @@ def add_project():
 
     form = NewProjectForm()
 
-    if form.validate_on_submit():
+    # form_submit = True
+
+    if form.add_yarn.data:
+        form.yarns.append_entry({})
+        # form_submit = False'
+    elif form.add_needles.data:
+        form.needles.append_entry({})
+    elif form.add_hooks.data:
+        form.hooks.append_entry({})
+    elif removeFieldListEntry(form.yarns):
+        # form_submit = False
+        pass
+    elif removeFieldListEntry(form.needles):
+        # form_submit = False
+        pass
+    elif removeFieldListEntry(form.hooks):
+        # form_submit = False
+        pass
+    elif form.validate_on_submit():
         project = Project(
             user_id = g.user.id,
             title = form.title.data or form.pattern.data or None,
             pattern = form.pattern.data,
             designer = form.designer.data,
             needles = form.needles.data,
-            content = form.content.data
+            content = form.content.data,
         )
 
         db.session.add(project)
