@@ -2,10 +2,14 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, g, redirect, render_template, session, flash
 from sqlalchemy.exc import IntegrityError
-from models import db, connect_db, User, Project
+from models import db, connect_db, User, Project, Needle, Hook, Yarn
 from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm, EditProjectForm
 from functools import wraps
 from utils import removeFieldListEntry
+
+
+DEFAULT_NEEDLE_DATA = {'size': 'US 00000000 - 0.5 mm'}
+DEFAULT_HOOK_DATA = {'size': '0.6 mm'}
 
 
 load_dotenv()
@@ -230,9 +234,33 @@ def add_project():
             title = form.title.data or form.pattern.data or None,
             pattern = form.pattern.data,
             designer = form.designer.data,
-            needles = form.needles.data,
             content = form.content.data,
         )
+
+        for needle in form.needles.entries:
+            needle = Needle.query.get(needle.data['size'])
+            if needle:
+                project.needles.append(needle)
+
+        for hook in form.hooks.entries:
+            hook = Hook.query.get(hook.data['size'])
+            if hook:
+                project.hooks.append(hook)
+
+        for yarn in form.yarns.entries:
+            project.yarns.append(
+                Yarn(
+                    yarn_name = yarn.data['yarn_name'],
+                    color = yarn.data['color'],
+                    dye_lot = yarn.data['dye_lot'],
+                    weight = yarn.data['weight'],
+                    skein_weight = yarn.data['skein_weight'],
+                    skein_weight_unit = yarn.data['skein_weight_unit'],
+                    skein_length = yarn.data['skein_length'],
+                    skein_length_unit = yarn.data['skein_length_unit'],
+                    num_skeins = yarn.data['num_skeins']
+                )
+            )
 
         db.session.add(project)
         db.session.commit()
@@ -264,17 +292,60 @@ def edit_project(project_id):
 
     form = EditProjectForm(obj=project)
 
-    if g.user.id == project.user.id and form.validate_on_submit():
+    if form.add_yarn.data:
+        form.yarns.append_entry({})
+        # form_submit = False'
+    elif form.add_needles.data:
+        form.needles.append_entry(DEFAULT_NEEDLE_DATA)
+    elif form.add_hooks.data:
+        form.hooks.append_entry(DEFAULT_HOOK_DATA)
+    elif removeFieldListEntry(form.yarns):
+        # form_submit = False
+        pass
+    elif removeFieldListEntry(form.needles):
+        # form_submit = False
+        pass
+    elif removeFieldListEntry(form.hooks):
+        # form_submit = False
+        pass
+    elif g.user.id == project.user.id and form.validate_on_submit():
         project.title = form.title.data or None
         project.pattern = form.pattern.data
         project.designer = form.designer.data
-        project.needles = form.needles.data
         project.content = form.content.data
+
+        project.needles = []
+        for needle in form.needles.entries:
+            needle = Needle.query.get(needle.data['size'])
+            if needle:
+                project.needles.append(needle)
+
+        project.hooks = []
+        for hook in form.hooks.entries:
+            hook = Hook.query.get(hook.data['size'])
+            if hook:
+                project.hooks.append(hook)
+
+        project.yarns = []
+        for yarn in form.yarns.entries:
+            project.yarns.append(
+                Yarn(
+                    yarn_name = yarn.data['yarn_name'],
+                    color = yarn.data['color'],
+                    dye_lot = yarn.data['dye_lot'],
+                    weight = yarn.data['weight'],
+                    skein_weight = yarn.data['skein_weight'],
+                    skein_weight_unit = yarn.data['skein_weight_unit'],
+                    skein_length = yarn.data['skein_length'],
+                    skein_length_unit = yarn.data['skein_length_unit'],
+                    num_skeins = yarn.data['num_skeins']
+                )
+            )
 
         db.session.commit()
 
         flash('Project edited.', 'success')
-        return redirect(f'/users/{g.user.id}')
+        return redirect(f'/projects/{project_id}')
 
     return render_template('projects/edit.html', form=form, project_id=project.id)
 

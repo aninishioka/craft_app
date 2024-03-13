@@ -13,3 +13,8 @@ def removeFieldListEntry(list):
         list.append_entry(entry)
 
     return len(list) != init_list_size
+
+
+def prepopulateFormFieldList(field_list, data_list):
+
+    pass

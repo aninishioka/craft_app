@@ -47,7 +47,7 @@ class LoginForm(FlaskForm):
 class YarnForm(Form):
     """Form to add yarn to project."""
 
-    name = StringField(
+    yarn_name = StringField(
         "Yarn Name",
         validators=[Optional(), Length(max=100)]
     )
@@ -103,7 +103,7 @@ class YarnForm(Form):
     )
 
     delete = SubmitField(
-        "Remove yarn"
+        "Remove"
     )
 
 
@@ -148,7 +148,7 @@ class NeedleForm(Form):
     )
 
     delete = SubmitField(
-        "Remove needle"
+        "Remove"
     )
 
 
@@ -208,7 +208,7 @@ class HookForm(Form):
     )
 
     delete = SubmitField(
-        "Remove hook"
+        "Remove"
     )
 
 

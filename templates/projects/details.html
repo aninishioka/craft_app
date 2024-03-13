@@ -26,11 +26,40 @@
   </p>
   {% endif %}
 
-  {% if project.yarns or project.needles %}
-  <h2>Materials:</h2>
-  {% if project.needles %}
-  <p>Needles {{ project.needles }}</p>
-  {% endif %}
+  {% if project.yarns or project.needles or project.yarns %}
+    <h2>Materials:</h2>
+    {% if project.needles %}
+      <h3>Needles</h3>
+      {% for needle in project.needles %}
+        {{ needle.size }}
+        {% if not loop.last %}
+          <br>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    {% if project.hooks %}
+      <h3>Hooks</h3>
+      {% for hook in project.hooks %}
+        {{ hook.size }}
+        {% if not loop.last %}
+          <br>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    {% if project.yarns %}
+      <h3>Yarns</h3>
+      {% for yarn in project.yarns %}
+     <h4>{{ yarn.name }}</h4>
+      <br>
+      Color: {{ yarn.color }}
+      <br>
+      Amount: {{ yarn.num_skeins }} = {{ yarn.num_skeins * yarn.skein_length}} {{ yarn.skein_length_unit}}
+      / {{ yarn.num_skeins * yarn.skein_weight}} {{ yarn.skein_weight_unit}}
+      {% if not loop.last %}
+        <br>
+      {% endif %}
+      {% endfor %}
+    {% endif %}
   {% endif %}
 
   <h2>Notes:</h2>

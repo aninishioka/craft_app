@@ -8,3 +8,9 @@
     </div>
 </div>
 {% endmacro %}
+
+{% macro display_errors(field) %}
+  {% for error in field.errors %}
+    <span class="text-danger">{{ error }}</span>
+  {% endfor %}
+{% endmacro %}

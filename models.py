@@ -77,7 +77,52 @@ class User(db.Model):
 
         return False
 
-    projects = db.relationship('Project', backref='user')
+    projects = db.relationship('Project', backref='user', cascade="all, delete-orphan")
+
+
+class ProjectNeedle(db.Model):
+    """Join table for projects and needles"""
+
+    __tablename__ = 'projects_needles'
+
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+        autoincrement=True
+    )
+
+    project_id = db.Column(
+        db.Integer,
+        db.ForeignKey('projects.id')
+    )
+
+    needle_size = db.Column(
+        db.String(25),
+        db.ForeignKey('needles.size')
+    )
+
+
+class ProjectHook(db.Model):
+    """Join table for projects and needles"""
+
+    __tablename__ = 'projects_hooks'
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+        autoincrement=True
+    )
+
+    project_id = db.Column(
+        db.Integer,
+        db.ForeignKey('projects.id')
+    )
+
+    needle_size = db.Column(
+        db.String(25),
+        db.ForeignKey('hooks.size')
+    )
 
 
 class Project(db.Model):
@@ -93,7 +138,7 @@ class Project(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('users.id', ondelete='CASCADE'),
+        db.ForeignKey('users.id'),
         nullable=False
     )
 
@@ -115,12 +160,6 @@ class Project(db.Model):
         default=''
     )
 
-    needles = db.Column(
-        db.String(50),
-        nullable=False,
-        default=''
-    )
-
     content = db.Column(
         db.Text,
         nullable=False,
@@ -133,7 +172,32 @@ class Project(db.Model):
         nullable=False
     )
 
-    yarns = db.relationship('Yarn', backref='project')
+    yarns = db.relationship('Yarn', backref='project', cascade="all, delete-orphan")
+
+    needles = db.relationship(
+        'Needle',
+        secondary='projects_needles',
+        backref='projects'
+    )
+
+    projects_needles = db.relationship(
+        'ProjectNeedle',
+        backref='project',
+        cascade="all, delete-orphan"
+    )
+
+    hooks = db.relationship(
+        'Hook',
+        secondary='projects_hooks',
+        backref='projects'
+    )
+
+    projects_hooks = db.relationship(
+        'ProjectHook',
+        backref='project',
+        cascade="all, delete-orphan"
+    )
+
 
 
 class Yarn(db.Model):
@@ -149,11 +213,10 @@ class Yarn(db.Model):
 
     project_id = db.Column(
         db.Integer,
-        db.ForeignKey('projects.id', ondelete='CASCADE'),
-        nullable=False
+        db.ForeignKey('projects.id')
     )
 
-    name = db.Column(
+    yarn_name = db.Column(
         db.String(100),
         nullable=False
     )
@@ -192,6 +255,10 @@ class Yarn(db.Model):
         db.String(10)
     )
 
+    num_skeins = db.Column(
+        db.Integer
+    )
+
 
 class Needle(db.Model):
     """Needle sizes."""
@@ -199,7 +266,7 @@ class Needle(db.Model):
     __tablename__ = 'needles'
 
     size = db.Column(
-        db.String(20),
+        db.String(25),
         primary_key=True
     )
 
@@ -210,7 +277,7 @@ class Hook(db.Model):
     __tablename__ = 'hooks'
 
     size = db.Column(
-        db.String(20),
+        db.String(25),
         primary_key=True
     )
 

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from 'projects/macros.html' import display_errors %}
 
 {% block content %}
 
@@ -7,22 +8,77 @@
     <form action="/projects/new" method="POST">
       {{ form.hidden_tag() }}
 
-      {% for field in form if field.widget.input_type != 'hidden' %}
-        {% if field.type == 'FieldList'%}
-          {% if field.entries|length > 0 %}
-            {% for error in field.errors %}
-              <span class="text-danger">{{ error }}</span>
-            {% endfor %}
-            {{ field(placeholder=field.label.text, class="form-control mb-3") }}
-          {% endif %}
-        {% else %}
-          {% for error in field.errors %}
-                <span class="text-danger">{{ error }}</span>
-          {% endfor %}
-          {{ field(placeholder=field.label.text, class="form-control mb-3") }}
-          {% endif %}
-      {% endfor %}
+      {{ display_errors(form.title) }}
+      {{ form.title(placeholder=form.title.label.text, class="form-control mb-3") }}
 
+      {{ display_errors(form.pattern) }}
+      {{ form.pattern(placeholder=form.pattern.label.text, class="form-control mb-3") }}
+
+      {{ display_errors(form.designer) }}
+      {{ form.designer(placeholder=form.designer.label.text, class="form-control mb-3") }}
+
+      {% if form.needles.entries|length > 0 %}
+        {% for nested_form in form.needles %}
+          <div class="input-group mb-2">
+          {{ nested_form.size(placeholder=nested_form.size.label.text, class="form-select") }}
+          {{ nested_form.delete(placeholder=nested_form.delete.label.text, class="btn btn-sm btn-outline-secondary") }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {{ form.add_needles(placeholder=form.add_needles.label.text, class="btn btn-md btn-secondary mb-3") }}
+
+      <br>
+
+      {% if form.hooks.entries|length > 0 %}
+        {% for nested_form in form.hooks %}
+          <div class="input-group mb-2">
+          {{ nested_form.size(placeholder=nested_form.size.label.text, class="form-select") }}
+          {{ nested_form.delete(placeholder=nested_form.delete.label.text, class="btn btn-sm btn-outline-secondary") }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {{ form.add_hooks(placeholder=form.add_hooks.label.text, class="btn btn-md btn-secondary mb-3") }}
+
+      <br>
+
+      {% if form.yarns.entries|length > 0 %}
+        {% for nested_form in form.yarns %}
+        <div class="mb-3">
+          {{ display_errors(nested_form.yarn_name) }}
+          {{ nested_form.yarn_name(placeholder=nested_form.yarn_name.label.text, class="form-control mb-2") }}
+          {{ display_errors(nested_form.color) }}
+          {{ nested_form.color(placeholder=nested_form.color.label.text, class="form-control mb-2") }}
+          {{ display_errors(nested_form.dye_lot) }}
+          {{ nested_form.dye_lot(placeholder=nested_form.dye_lot.label.text, class="form-control mb-2") }}
+          <div class="input-group mb-2">
+            <span class="input-group-text">{{ nested_form.weight.label.text }}</span>
+            {{ nested_form.weight(placeholder=nested_form.weight.label.text, class="form-select") }}
+          </div>
+          {{ display_errors(nested_form.skein_weight) }}
+          <div class="input-group mb-2">
+            {{ nested_form.skein_weight(placeholder=nested_form.skein_weight.label.text, class="form-control") }}
+            {{ nested_form.skein_weight_unit(placeholder=nested_form.skein_weight_unit.label.text, class="form-select") }}
+          </div>
+          {{ display_errors(nested_form.skein_length) }}
+          <div class="input-group mb-2">
+            {{ nested_form.skein_length(placeholder=nested_form.skein_length.label.text, class="form-control") }}
+            {{ nested_form.skein_length_unit(placeholder=nested_form.skein_length_unit.label.text, class="form-select") }}
+          </div>
+          {{ display_errors(nested_form.num_skeins) }}
+          {{ nested_form.num_skeins(placeholder=nested_form.num_skeins.label.text, class="form-control mb-2") }}
+          {{ nested_form.delete(placeholder=nested_form.delete.label.text, class="btn btn-sm btn-outline-secondary") }}
+        </div>
+        {% endfor %}
+      {% endif %}
+
+      {{ form.add_yarn(placeholder=form.add_yarn.label.text, class="btn btn-md btn-secondary mb-3") }}
+
+      {{ display_errors(form.content) }}
+      {{ form.content(placeholder=form.add_yarn.label.text, class="form-control mb-2") }}
+
+      <br>
       <button class="btn btn-primary">Add project</button>
     </form>
   </div>
