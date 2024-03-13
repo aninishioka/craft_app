@@ -166,6 +166,12 @@ class Project(db.Model):
         default=''
     )
 
+    pinned = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False
+    )
+
     created_at = db.Column(
         db.DateTime(timezone=True),
         default=datetime.utcnow,

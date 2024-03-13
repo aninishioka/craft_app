@@ -7,12 +7,19 @@
   {% if g.user.id == project.user.id %}
   <form class="mb-4">
     {{ g.csrf_form.hidden_tag() }}
+    <input type="hidden" name="came_from" value="{{request.url}}">
     <button formaction="/projects/{{project.id}}/edit" class="btn btn-secondary">
       <i class="bi bi-pencil"></i> Edit
     </button>
-    <button form="/projects/{{project.id}}/pin" class="btn btn-primary">
-      <i class="bi bi-pin-angle"></i> Pin
-    </button>
+    {% if project.pinned %}
+      <button formaction="/projects/{{project.id}}/unpin" formmethod="POST" class="btn btn-primary">
+        <i class="bi bi-pin-angle-fill"></i> Unpin
+      </button>
+      {% else %}
+      <button formaction="/projects/{{project.id}}/pin"  formmethod="POST" class="btn btn-primary">
+        <i class="bi bi-pin-angle"></i> Pin
+      </button>
+    {% endif %}
     <button formaction="/projects/{{project.id}}/delete" formmethod="POST" class="btn btn-danger">
       <i class="bi bi-trash3"></i> Delete
     </button>

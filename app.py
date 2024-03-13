@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from flask import Flask, g, redirect, render_template, session, flash
+from flask import Flask, g, redirect, render_template, session, flash, request
 from sqlalchemy.exc import IntegrityError
 from models import db, connect_db, User, Project, Needle, Hook, Yarn
 from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm, EditProjectForm
@@ -369,3 +369,47 @@ def delete_project(project_id):
 
     flash('Project deleted', 'success')
     return redirect(f'/users/{g.user.id}')
+
+
+@app.post('/projects/<int:project_id>/pin')
+@login_required
+def pin_project(project_id):
+    """Handle pinning project."""
+
+    project = Project.query.get_or_404(project_id)
+
+    form = g.csrf_form
+
+    if g.user.id != project.user.id and not form.validate_on_submit():
+        flash('Unathorized', 'danger')
+        return redirect("/")
+
+    project.pinned=True
+    db.session.commit()
+
+    redirect_url = request.form.get("came_from", "/")
+
+    flash('Project pinned', 'success')
+    return redirect(redirect_url)
+
+
+@app.post('/projects/<int:project_id>/unpin')
+@login_required
+def unpin_project(project_id):
+    """Handle unpinning project."""
+
+    project = Project.query.get_or_404(project_id)
+
+    form = g.csrf_form
+
+    if g.user.id != project.user.id and not form.validate_on_submit():
+        flash('Unathorized', 'danger')
+        return redirect("/")
+
+    project.pinned=False
+    db.session.commit()
+
+    redirect_url = request.form.get("came_from", "/")
+
+    flash('Project unpinned', 'success')
+    return redirect(redirect_url)

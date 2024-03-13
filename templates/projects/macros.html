@@ -1,6 +1,21 @@
 {% macro create_project_card(project) %}
 <div class="col-lg-3 col-md-6 col-12 mt-2">
     <div class="card project-card">
+      <div class="card-header">
+        <form>
+          {{ g.csrf_form.hidden_tag() }}
+          <input type="hidden" name="came_from" value="{{request.url}}">
+          {% if project.pinned %}
+            <button formaction="/projects/{{project.id}}/unpin" formmethod="POST" class="btn btn-outline-primary project-card-btn">
+              <i class="bi bi-pin-angle-fill"></i>
+            </button>
+            {% else %}
+            <button formaction="/projects/{{project.id}}/pin"  formmethod="POST" class="btn btn-outline-primary project-card-btn">
+              <i class="bi bi-pin-angle"></i>
+            </button>
+          {% endif %}
+        </form>
+      </div>
       <div class="card-body">
         <h5 class="card-title">{{ project.title }}</h5>
         <a href="/projects/{{project.id}}" class="stretched-link"></a>
