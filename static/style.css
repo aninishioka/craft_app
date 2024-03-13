@@ -1,3 +1,24 @@
-#nav-user-img {
-  width: 30px;
+:root {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ==================== Project details */
+
+.project-details h1 {
+  font-size: 2rem;
+}
+
+.project-details h2 {
+  font-size: 1.2rem;
+  margin-top: 2rem;
+}
+
+h2.project-details-pattern {
+  display: inline-block;
+}
+
+.project-details .yarn {
+  margin-bottom: 1.8srem;
 }

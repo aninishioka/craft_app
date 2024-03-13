@@ -2,34 +2,35 @@
 
 {% block content %}
 
-<div class="container">
+<div class="container project-details">
 
   {% if g.user.id == project.user.id %}
-  <form>
+  <form class="mb-4">
     {{ g.csrf_form.hidden_tag() }}
-    <button formaction="/projects/{{project.id}}/edit" class="btn btn-secondary mb-5">
-      Edit
+    <button formaction="/projects/{{project.id}}/edit" class="btn btn-secondary">
+      <i class="bi bi-pencil"></i> Edit
     </button>
-    <button formaction="/projects/{{project.id}}/delete" formmethod="POST" class="btn btn-danger mb-5">
-      Delete
+    <button form="/projects/{{project.id}}/pin" class="btn btn-primary">
+      <i class="bi bi-pin-angle"></i> Pin
     </button>
-</form>
+    <button formaction="/projects/{{project.id}}/delete" formmethod="POST" class="btn btn-danger">
+      <i class="bi bi-trash3"></i> Delete
+    </button>
+  </form>
   {% endif %}
 
-  <h1 class="mb-5">{{ project.title }}</h1>
+  <h1>{{ project.title }}</h1>
 
   {% if project.pattern %}
-  <h2>Pattern:</h2>
-  <p>
+    <h2 class="project-details-pattern">Pattern:
     {{ project.pattern }}
     {% if project.designer %} by {{ project.designer }} {% endif %}
-  </p>
+    </h2>
   {% endif %}
 
   {% if project.yarns or project.needles or project.yarns %}
-    <h2>Materials:</h2>
     {% if project.needles %}
-      <h3>Needles</h3>
+      <h2>Needles</h2>
       {% for needle in project.needles %}
         {{ needle.size }}
         {% if not loop.last %}
@@ -38,7 +39,7 @@
       {% endfor %}
     {% endif %}
     {% if project.hooks %}
-      <h3>Hooks</h3>
+      <h2>Hooks</h2>
       {% for hook in project.hooks %}
         {{ hook.size }}
         {% if not loop.last %}
@@ -47,17 +48,22 @@
       {% endfor %}
     {% endif %}
     {% if project.yarns %}
-      <h3>Yarns</h3>
+      <h2>Yarns</h2>
       {% for yarn in project.yarns %}
-     <h4>{{ yarn.name }}</h4>
-      <br>
-      Color: {{ yarn.color }}
-      <br>
-      Amount: {{ yarn.num_skeins }} = {{ yarn.num_skeins * yarn.skein_length}} {{ yarn.skein_length_unit}}
-      / {{ yarn.num_skeins * yarn.skein_weight}} {{ yarn.skein_weight_unit}}
-      {% if not loop.last %}
+      <div class="yarn">
+        Yarn: {{ yarn.yarn_name }}
         <br>
-      {% endif %}
+        Color: {{ yarn.color }}
+        <br>
+        {% if yarn.num_skeins and (yarn.skein_weight or yarn.skein_length) %}
+          Amount: {{ yarn.num_skeins }} =
+          {{ (yarn.num_skeins or 0) * (yarn.skein_length or 0)}} {{ yarn.skein_length_unit}} /
+           {{ (yarn.num_skeins or 0) * (yarn.skein_weight or 0)}} {{ yarn.skein_weight_unit}}
+        {% endif %}
+        {% if not loop.last %}
+          <br>
+        {% endif %}
+      </div>
       {% endfor %}
     {% endif %}
   {% endif %}
