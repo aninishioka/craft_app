@@ -17,7 +17,7 @@
 
   {% endif %}
   <div class="row">
-    {% for project in user.projects %}
+    {% for project in projects %}
     {{ create_project_card(project) }}
     {% endfor %}
   </div>

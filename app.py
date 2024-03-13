@@ -171,7 +171,11 @@ def user_page(user_id):
 
     user = User.query.get_or_404(user_id)
 
-    return render_template('users/profile.html', user=user)
+    projects = Project.query.filter(Project.user_id == user_id).order_by(Project.pinned.desc(), Project.created_at.desc())
+
+    # TODO: get projects sorted by pinned/unpinned + date created
+
+    return render_template('users/profile.html', user=user, projects=projects)
 
 
 @app.route('/users/profile', methods=['GET', 'POST'])
