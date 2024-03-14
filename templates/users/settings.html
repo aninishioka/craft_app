@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-center">
+  <div class="col-md-7 col-lg-5">
+    <form action="/settings" method="POST">
+      {{ form.hidden_tag() }}
+
+      <div class="mb-5">
+        <h2>Edit Profile</h2>
+        {% for field in form if field.widget.input_type != 'hidden' %}
+        {% for error in field.errors %}
+        <span class="text-danger">{{ error }}</span>
+        {% endfor %}
+        {{ field(placeholder=field.label.text, class="form-control mb-3") }}
+        {% endfor %}
+
+        <button class="btn btn-primary">Save changes</button>
+      </div>
+
+      <div class="mb-5">
+        <h2>Account Privacy</h2>
+        {% if g.user.private %}
+          <button formaction="/users/unprivate" formmethod="POST" class="btn btn-primary mb-2">
+            Make account public
+          </button>
+        {% else %}
+          <button formaction="/users/private" formmethod="POST" class="btn btn-primary mb-2">
+            Make account private
+          </button>
+        {% endif %}
+      </div>
+
+      <div class="mb-5">
+        <h2>Delete Account</h2>
+        <button formaction="/users/delete" formmethod="POST" class="btn btn-danger mb-2">
+          Delete User
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

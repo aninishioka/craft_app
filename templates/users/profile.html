@@ -12,9 +12,6 @@
     <button formaction="/projects/log_time" class="btn btn-success mb-2">
       Log time
     </button>
-    <button formaction="/users/delete" formmethod="POST" class="btn btn-danger mb-2">
-      Delete User
-    </button>
   </form>
   {% endif %}
 
@@ -29,6 +26,10 @@
             {% if user in g.user.following %}
               <button formaction="/users/{{user.id}}/unfollow" formmethod="POST" class="btn btn-secondary mb-2">
                 Unfollow
+              </button>
+            {% elif user in g.user.requests_made %}
+              <button formaction="/users/{{user.id}}/cancel_request" formmethod="POST" class="btn btn-primary mb-2">
+                Requested
               </button>
             {% else %}
               <button formaction="/users/{{user.id}}/follow" formmethod="POST" class="btn btn-secondary mb-2">

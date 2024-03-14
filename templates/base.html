@@ -7,8 +7,7 @@
   <title>Crafty</title>
 
   <link rel="stylesheet" href="https://unpkg.com/bootstrap@5/dist/css/bootstrap.css">
-  <link rel="stylesheet"
-        href="https://www.unpkg.com/bootstrap-icons/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://www.unpkg.com/bootstrap-icons/font/bootstrap-icons.css">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 
@@ -28,7 +27,16 @@
           <input class="form-control me-2" name="q" type="search" placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-success" type="submit">Search</button>
         </form>
+        <a href="/notifications" class="btn btn-outline-secondary position-relative">
+          <i class="bi bi-bell"></i>
+          {% if g.user.requests_received|length > 0 %}
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {{ g.user.requests_received|length }}
+            <span class="visually-hidden">new notifications</span>
+            {% endif %}
+          </a>
         <a href="/users/{{g.user.id}}" class="nav-link">Profile</a>
+        <a href="/settings" class="nav-link">Settings</a>
         <form action="/logout" method="POST">
           {{ g.csrf_form.hidden_tag() }}
           <button type="submit" class="btn btn-outline-secondary">Log out</button>

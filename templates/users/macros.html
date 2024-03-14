@@ -11,6 +11,10 @@
               <button formaction="/users/{{user.id}}/unfollow" formmethod="POST" class="card-btn btn btn-secondary mb-2">
                 Unfollow
               </button>
+              {% elif user in g.user.requests_made %}
+              <button formaction="/users/{{user.id}}/cancel_request" formmethod="POST" class="card-btn btn btn-primary mb-2">
+                Requested
+              </button>
             {% else %}
               <button formaction="/users/{{user.id}}/follow" formmethod="POST" class="card-btn btn btn-secondary mb-2">
                 Follow
@@ -19,6 +23,30 @@
           {% endif %}
       </form>
       <a href="/users/{{user.id}}" class="stretched-link"></a>
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro create_request_card(request) %}
+<div class="col-lg-4 col-md-6 col-12 mt-2">
+  <div class="card">
+    <div class="card-body d-flex">
+      <h5 class="card-title">
+        <a href="/users/{{request.user_being_requested_id}}">
+          {{ request.username }}
+        </a>
+      </h5>
+      <form>
+        {{ g.csrf_form.hidden_tag() }}
+        <input type="hidden" name="came_from" value="{{request.url}}">
+        <button formaction="/requests/{{request.user_requesting_id}}/confirm" formmethod="POST" class="card-btn btn btn-primary">
+          Confirm
+        </button>
+        <button formaction="/requests/{{request.user_requesting_id}}/delete" formmethod="POST" class="card-btn btn btn-secondary">
+          Delete
+        </button>
+      </form>
     </div>
   </div>
 </div>

@@ -28,6 +28,25 @@ class Follow(db.Model):
     )
 
 
+class Request(db.Model):
+    """Join table for users to users.
+    Keeps track of requests to follow private accounts."""
+
+    __tablename__ = 'requests'
+
+    user_being_requested_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        primary_key=True
+    )
+
+    user_requesting_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        primary_key=True
+    )
+
+
 class User(db.Model):
     """Site user."""
 
@@ -62,6 +81,12 @@ class User(db.Model):
         nullable=False
     )
 
+    private = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False
+    )
+
     projects = db.relationship('Project', backref='user', cascade="all, delete-orphan")
 
     followers = db.relationship(
@@ -70,6 +95,14 @@ class User(db.Model):
         primaryjoin=(Follow.user_being_followed_id == id),
         secondaryjoin=(Follow.user_following_id == id),
         backref="following",
+    )
+
+    requests_received = db.relationship(
+        'User',
+        secondary="requests",
+        primaryjoin=(Request.user_being_requested_id == id),
+        secondaryjoin=(Request.user_requesting_id == id),
+        backref="requests_made",
     )
 
     @classmethod

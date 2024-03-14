@@ -1,9 +1,10 @@
 import os
 from dotenv import load_dotenv
 from flask import Flask, g, redirect, render_template, session, flash, request
+from sqlalchemy import alias
 from sqlalchemy.exc import IntegrityError
-from models import db, connect_db, User, Project, Needle, Hook, Yarn, TimeLog
-from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm, EditProjectForm, ProjectTimeLogForm, EditTimeLogForm
+from models import db, connect_db, User, Project, Needle, Hook, Yarn, TimeLog, Request
+from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm, EditProjectForm, ProjectTimeLogForm, EditTimeLogForm, EditUserForm
 from functools import wraps
 from utils import removeFieldListEntry
 
@@ -56,6 +57,24 @@ def login_required(f):
         return f(*args, **kwargs)
 
     return login_decorator
+
+
+def check_authorization(f):
+    """Function decorator. Checks if user allowed to access a resource."""
+
+    @wraps(f)
+    def authorization_decorator(user_id):
+
+        other_user = User.query.get_or_404(user_id)
+
+        if other_user.private:
+            if g.user != other_user and not g.user.is_following(other_user):
+                return render_template('users/private.html', user=other_user)
+
+        return f(user_id)
+
+    return authorization_decorator
+
 
 
 def login_user(user):
@@ -177,13 +196,12 @@ def user_list():
     else:
         users = User.query.all()
 
-    # TODO: add search
-
     return render_template('users/user_list.html', users=users)
 
 
 @app.get('/users/<int:user_id>')
 @login_required
+@check_authorization
 def user_page(user_id):
     """Show user profile."""
 
@@ -196,6 +214,80 @@ def user_page(user_id):
         )
 
     return render_template('users/projects.html', user=user, projects=projects)
+
+
+@app.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    """Show user settings."""
+
+    form = EditUserForm(obj=g.user)
+
+    if form.validate_on_submit():
+        user = User.query.get(g.user.id)
+
+        user.username = form.username.data
+        user.email = form.email.data
+        user.image_url = form.image_url.data
+
+        db.session.commit()
+
+        flash('Changes saved.', 'success')
+
+    return render_template('users/settings.html', form=form)
+
+
+@app.get('/notifications')
+@login_required
+def notifications():
+    """Show user notifications."""
+
+    follow_requests = db.session.query(
+        Request.user_requesting_id,
+        User.username
+    ).outerjoin(User, User.id == Request.user_requesting_id).filter(
+        Request.user_being_requested_id == g.user.id
+    ).all()
+
+    print(follow_requests)
+
+    return render_template('users/notifications.html', follow_requests = follow_requests)
+
+
+@app.post('/users/private')
+@login_required
+def private_account():
+    """Handle privating account."""
+
+    form = g.csrf_form
+
+    if form.validate_on_submit():
+        user = User.query.get(g.user.id)
+
+        user.private = True
+        db.session.commit()
+
+        flash('Account now private.', 'success')
+
+    return render_template('users/settings.html', form=form)
+
+
+@app.post('/users/unprivate')
+@login_required
+def unprivate_account():
+    """Handle unprivating account."""
+
+    form = g.csrf_form
+
+    if form.validate_on_submit():
+        user = User.query.get(g.user.id)
+
+        user.private = False
+        db.session.commit()
+
+        flash('Account now public.', 'success')
+
+    return render_template('users/settings.html', form=form)
 
 
 @app.get('/users/<int:user_id>/following')
@@ -219,12 +311,6 @@ def user_followers(user_id):
 
     return render_template('users/followers.html', user=user)
 
-
-@app.route('/users/profile', methods=['GET', 'POST'])
-@login_required
-def edit_user():
-    # TODO:
-    return
 
 @app.post('/users/delete')
 @login_required
@@ -257,12 +343,18 @@ def follow_user(user_id):
         flash('Unathorized', 'danger')
         return redirect("/")
 
-    user.followers.append(g.user)
-    db.session.commit()
+    if user.private:
+        user.requests_received.append(g.user)
+        db.session.commit()
+        flash(f'Request sent to {user.username}', 'success')
+
+    else:
+        user.followers.append(g.user)
+        db.session.commit()
+        flash(f'Now following {user.username}', 'success')
 
     redirect_url = request.form.get("came_from", "/")
 
-    flash(f'Now following {user.username}', 'success')
     return redirect(redirect_url)
 
 
@@ -286,6 +378,73 @@ def unfollow_user(user_id):
 
     flash(f'Unfollowed {user.username}', 'success')
     return redirect(redirect_url)
+
+
+@app.post('/users/<int:user_id>/cancel_request')
+@login_required
+def cancel_follow_request(user_id):
+    """Handle canceling follow request user."""
+
+    form = g.csrf_form
+
+    user = User.query.get_or_404(user_id)
+
+    if not form.validate_on_submit():
+        flash('Unathorized', 'danger')
+        return redirect("/")
+
+    user.requests_received.remove(g.user)
+    db.session.commit()
+
+    redirect_url = request.form.get("came_from", "/")
+
+    flash(f'Canceled follow request.', 'success')
+    return redirect(redirect_url)
+
+
+##############################################################################
+# Request routes:
+
+@app.post('/requests/<int:requesting_user_id>/confirm')
+@login_required
+def confirm_request(requesting_user_id):
+    """Confirm follow request."""
+
+    form = g.csrf_form
+
+    if not form.validate_on_submit():
+        flash('Unathorized', 'danger')
+        return redirect("/")
+
+    follow_request = Request.query.get_or_404((g.user.id, requesting_user_id))
+    db.session.delete(follow_request)
+    db.session.commit()
+
+    other_user = User.query.get_or_404(requesting_user_id)
+    g.user.followers.append(other_user)
+    db.session.commit()
+
+    flash(f'{other_user.username} is following you now.', 'success')
+    return redirect('/notifications')
+
+
+@app.post('/requests/<int:requesting_user_id>/delete')
+@login_required
+def delete_request(requesting_user_id):
+    """Delete follow request."""
+
+    form = g.csrf_form
+
+    if not form.validate_on_submit():
+        flash('Unathorized', 'danger')
+        return redirect("/")
+
+    follow_request = Request.query.get_or_404((g.user.id, requesting_user_id))
+    db.session.delete(follow_request)
+    db.session.commit()
+
+    flash('Deleted follow request.', 'success')
+    return redirect('/notifications')
 
 
 ##############################################################################

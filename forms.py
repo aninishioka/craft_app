@@ -44,6 +44,25 @@ class LoginForm(FlaskForm):
     )
 
 
+class EditUserForm(FlaskForm):
+    """Form to edit user."""
+
+    username = StringField(
+        'Username',
+        validators=[InputRequired(), Length(max=30)]
+    )
+
+    email = StringField(
+        'Email',
+        validators=[InputRequired(), Email()]
+    )
+
+    image_url = StringField(
+        'Image URL',
+        validators=[Optional(), Length(max=255), URL()]
+    )
+
+
 class YarnForm(Form):
     """Form to add yarn to project."""
 
