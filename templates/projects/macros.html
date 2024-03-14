@@ -1,5 +1,5 @@
 {% macro create_project_card(project) %}
-<div class="col-lg-3 col-md-6 col-12 mt-2">
+<div class="col-lg-4 col-md-6 col-12 mt-2">
   <div class="card project-card">
     <div class="card-header">
       <form>
@@ -7,12 +7,12 @@
         <input type="hidden" name="came_from" value="{{request.url}}">
         {% if project.pinned %}
         <button formaction="/projects/{{project.id}}/unpin" formmethod="POST"
-          class="btn btn-outline-primary project-card-btn">
+          class="btn btn-outline-primary card-btn">
           <i class="bi bi-pin-angle-fill"></i>
         </button>
         {% else %}
         <button formaction="/projects/{{project.id}}/pin" formmethod="POST"
-          class="btn btn-outline-primary project-card-btn">
+          class="btn btn-outline-primary card-btn">
           <i class="bi bi-pin-angle"></i>
         </button>
         {% endif %}
@@ -28,7 +28,7 @@
 
 
 {% macro create_log_card(log) %}
-<div class="card project-card mb-2">
+<div class="card mb-2">
   <div class="card-header">
     {{ log.date }}
     <a href="/logs/{{log.id}}/edit" class="btn btn-secondary">
@@ -48,4 +48,4 @@
   not hours else minutes}} minutes {% endmacro %} {% macro display_errors(field) %} {% for error in field.errors %}
   <span class="text-danger">{{ error }}</span>
   {% endfor %}
-  {% endmacro %}
+{% endmacro %}

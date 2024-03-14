@@ -4,11 +4,17 @@
   box-sizing: border-box;
 }
 
-/* ==================== Project cards */
-.project-card-btn {
+.card-btn {
   position: relative;
   z-index: 2;
 }
+
+/* ==================== User profile */
+.user-profile .side-bar {
+  width: 200px;
+}
+
+/* ==================== Project cards */
 
 /* ==================== Project details */
 

@@ -1,0 +1,25 @@
+{% macro create_user_card(user) %}
+<div class="col-lg-4 col-md-6 col-12 mt-2">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">{{ user.username }}</h5>
+      <form>
+        {{ g.csrf_form.hidden_tag() }}
+        <input type="hidden" name="came_from" value="{{request.url}}">
+        {% if g.user.id != user.id %}
+            {% if user in g.user.following %}
+              <button formaction="/users/{{user.id}}/unfollow" formmethod="POST" class="card-btn btn btn-secondary mb-2">
+                Unfollow
+              </button>
+            {% else %}
+              <button formaction="/users/{{user.id}}/follow" formmethod="POST" class="card-btn btn btn-secondary mb-2">
+                Follow
+              </button>
+            {% endif %}
+          {% endif %}
+      </form>
+      <a href="/users/{{user.id}}" class="stretched-link"></a>
+    </div>
+  </div>
+</div>
+{% endmacro %}

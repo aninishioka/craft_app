@@ -1,9 +1,8 @@
 {% extends 'base.html' %}
-{% from 'projects/macros.html' import create_project_card %}
 
 {% block content %}
 
-<div class="container">
+<div class="container user-profile">
   {% if g.user.id == user.id %}
   <form>
     {{ g.csrf_form.hidden_tag() }}
@@ -17,12 +16,49 @@
       Delete User
     </button>
   </form>
-
   {% endif %}
-  <div class="row">
-    {% for project in projects %}
-    {{ create_project_card(project) }}
-    {% endfor %}
+
+  <div class="d-flex">
+    <div class="card side-bar me-5">
+      <div class="card-body text-center">
+        <h5 class="card-title mb-3">{{ user.username }}</h5>
+        <form action="/users/{{user.id}}/follow">
+          {{ g.csrf_form.hidden_tag() }}
+          <input type="hidden" name="came_from" value="{{request.url}}">
+          {% if g.user.id != user.id %}
+            {% if user in g.user.following %}
+              <button formaction="/users/{{user.id}}/unfollow" formmethod="POST" class="btn btn-secondary mb-2">
+                Unfollow
+              </button>
+            {% else %}
+              <button formaction="/users/{{user.id}}/follow" formmethod="POST" class="btn btn-secondary mb-2">
+                Follow
+              </button>
+            {% endif %}
+          {% endif %}
+        </form>
+        <hr/>
+        <a href="/users/{{user.id}}">
+          {{user.projects|length}} {{ 'Project' if user.projects|length == 1 else 'Projects'}}
+        </a>
+        <hr/>
+        <a href="/users/{{user.id}}/followers">
+          <p class="card-text">
+            {{ user.followers|length }} {{ 'Follower' if user.followers|length == 1 else 'Followers'}}
+          </p>
+        </a>
+        <a href="/users/{{user.id}}/following">
+          <p class="card-text">
+            Following {{ user.following|length }}
+          </p>
+        </a>
+      </div>
+    </div>
+
+    <div class="flex-fill">
+      {% block profile_content%}
+      {% endblock %}
+    </div>
   </div>
 </div>
 

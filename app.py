@@ -164,6 +164,24 @@ def logout():
 ##############################################################################
 # General user routes:
 
+@app.get('/users')
+@login_required
+def user_list():
+    """Page listing users.
+    Can take query param, 'q', to search by username."""
+
+    search_term = request.args.get('q')
+
+    if search_term:
+        users = User.query.filter(User.username.ilike(f'%{search_term}%')).all()
+    else:
+        users = User.query.all()
+
+    # TODO: add search
+
+    return render_template('users/user_list.html', users=users)
+
+
 @app.get('/users/<int:user_id>')
 @login_required
 def user_page(user_id):
@@ -177,7 +195,29 @@ def user_page(user_id):
             Project.pinned.desc(), Project.created_at.desc()
         )
 
-    return render_template('users/profile.html', user=user, projects=projects)
+    return render_template('users/projects.html', user=user, projects=projects)
+
+
+@app.get('/users/<int:user_id>/following')
+@login_required
+def user_following(user_id):
+    """Show user profile."""
+
+# TODO: n+1
+    user = User.query.get_or_404(user_id)
+
+    return render_template('users/following.html', user=user)
+
+
+@app.get('/users/<int:user_id>/followers')
+@login_required
+def user_followers(user_id):
+    """Show user profile."""
+
+# TODO: n+1
+    user = User.query.get_or_404(user_id)
+
+    return render_template('users/followers.html', user=user)
 
 
 @app.route('/users/profile', methods=['GET', 'POST'])
@@ -202,6 +242,50 @@ def delete_user():
 
     flash('User deleted', 'success')
     return redirect(f'/signup')
+
+
+@app.post('/users/<int:user_id>/follow')
+@login_required
+def follow_user(user_id):
+    """Handle following user."""
+
+    form = g.csrf_form
+
+    user = User.query.get_or_404(user_id)
+
+    if not form.validate_on_submit():
+        flash('Unathorized', 'danger')
+        return redirect("/")
+
+    user.followers.append(g.user)
+    db.session.commit()
+
+    redirect_url = request.form.get("came_from", "/")
+
+    flash(f'Now following {user.username}', 'success')
+    return redirect(redirect_url)
+
+
+@app.post('/users/<int:user_id>/unfollow')
+@login_required
+def unfollow_user(user_id):
+    """Handle unfollowing user."""
+
+    form = g.csrf_form
+
+    user = User.query.get_or_404(user_id)
+
+    if not form.validate_on_submit():
+        flash('Unathorized', 'danger')
+        return redirect("/")
+
+    user.followers.remove(g.user)
+    db.session.commit()
+
+    redirect_url = request.form.get("came_from", "/")
+
+    flash(f'Unfollowed {user.username}', 'success')
+    return redirect(redirect_url)
 
 
 ##############################################################################

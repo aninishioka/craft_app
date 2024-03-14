@@ -24,6 +24,10 @@
         <a href="/signup" class="nav-link">Sign up</a>
         <a href="/login" class="nav-link">Log in</a>
         {% else %}
+        <form class="d-flex" role="search" action="/users">
+          <input class="form-control me-2" name="q" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
         <a href="/users/{{g.user.id}}" class="nav-link">Profile</a>
         <form action="/logout" method="POST">
           {{ g.csrf_form.hidden_tag() }}

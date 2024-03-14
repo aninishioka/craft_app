@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% from 'users/macros.html' import create_user_card %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    {% for user in users %}
+      {{ create_user_card(user) }}
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

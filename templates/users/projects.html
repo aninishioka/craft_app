@@ -1,0 +1,10 @@
+{% extends '/users/profile.html' %}
+{% from '/projects/macros.html' import create_project_card %}
+
+{% block profile_content%}
+<div class="row flex-fill">
+  {% for project in projects %}
+  {{ create_project_card(project) }}
+  {% endfor %}
+</div>
+{% endblock %}

@@ -10,6 +10,24 @@ DEFAULT_IMG_URL = (
     "default-user-icon-28.jpg")
 
 
+class Follow(db.Model):
+    """Join table for users and users."""
+
+    __tablename__ = 'follows'
+
+    user_being_followed_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        primary_key=True
+    )
+
+    user_following_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        primary_key=True
+    )
+
+
 class User(db.Model):
     """Site user."""
 
@@ -42,6 +60,16 @@ class User(db.Model):
     password = db.Column(
         db.String(150),
         nullable=False
+    )
+
+    projects = db.relationship('Project', backref='user', cascade="all, delete-orphan")
+
+    followers = db.relationship(
+        'User',
+        secondary="follows",
+        primaryjoin=(Follow.user_being_followed_id == id),
+        secondaryjoin=(Follow.user_following_id == id),
+        backref="following",
     )
 
     @classmethod
@@ -77,7 +105,17 @@ class User(db.Model):
 
         return False
 
-    projects = db.relationship('Project', backref='user', cascade="all, delete-orphan")
+    def is_following(self, other_user):
+        """Checks if user is following other_user."""
+
+        user_list = [user for user in self.following if user == other_user]
+        return len(user_list) == 1
+
+    def is_followed_by(self, other_user):
+        """Checks if user is followed by other_user."""
+
+        user_list = [user for user in self.followers if user == other_user]
+        return len(user_list) == 1
 
 
 class ProjectNeedle(db.Model):
