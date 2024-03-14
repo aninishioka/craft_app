@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% from 'projects/macros.html' import display_errors %}
+
+{% block content %}
+
+<div class="d-flex justify-content-center">
+  <div class="col-md-7 col-lg-5">
+    <form action="/projects/log_time" method="POST">
+      {{ g.csrf_form.hidden_tag() }}
+
+      {{ display_errors(form.project)}}
+      {{ form.project.label }}
+      {{ form.project(class="form-select mb-3")}}
+
+      {{ display_errors(form.date)}}
+
+      {{ form.date.label }}
+      {{ form.date(class="form-control mb-3")}}
+
+      {{ display_errors(form.hours)}}
+      {{ display_errors(form.minutes)}}
+      Duration
+      <div class="input-group mb-2">
+        {{ form.hours(class="form-control") }}
+        <span class="input-group-text">:</span>
+        {{ form.minutes(class="form-control") }}
+      </div>
+
+      {{ display_errors(form.notes)}}
+      {{ form.notes.label }}
+      {{ form.notes(class="form-control mb-2") }}
+
+      <button class="btn btn-primary">Log time</button>
+    </form>
+  </div>
+</div>
+
+
+{% endblock %}

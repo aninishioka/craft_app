@@ -2,8 +2,8 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, g, redirect, render_template, session, flash, request
 from sqlalchemy.exc import IntegrityError
-from models import db, connect_db, User, Project, Needle, Hook, Yarn
-from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm, EditProjectForm
+from models import db, connect_db, User, Project, Needle, Hook, Yarn, TimeLog
+from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm, EditProjectForm, ProjectTimeLogForm, EditTimeLogForm
 from functools import wraps
 from utils import removeFieldListEntry
 
@@ -171,9 +171,11 @@ def user_page(user_id):
 
     user = User.query.get_or_404(user_id)
 
-    projects = Project.query.filter(Project.user_id == user_id).order_by(Project.pinned.desc(), Project.created_at.desc())
-
-    # TODO: get projects sorted by pinned/unpinned + date created
+    projects = Project.query.filter(
+        Project.user_id == user_id
+        ).order_by(
+            Project.pinned.desc(), Project.created_at.desc()
+        )
 
     return render_template('users/profile.html', user=user, projects=projects)
 
@@ -214,23 +216,17 @@ def add_project():
 
     form = NewProjectForm()
 
-    # form_submit = True
-
     if form.add_yarn.data:
         form.yarns.append_entry({})
-        # form_submit = False'
     elif form.add_needles.data:
         form.needles.append_entry({})
     elif form.add_hooks.data:
         form.hooks.append_entry({})
     elif removeFieldListEntry(form.yarns):
-        # form_submit = False
         pass
     elif removeFieldListEntry(form.needles):
-        # form_submit = False
         pass
     elif removeFieldListEntry(form.hooks):
-        # form_submit = False
         pass
     elif form.validate_on_submit():
         project = Project(
@@ -298,19 +294,15 @@ def edit_project(project_id):
 
     if form.add_yarn.data:
         form.yarns.append_entry({})
-        # form_submit = False'
     elif form.add_needles.data:
         form.needles.append_entry(DEFAULT_NEEDLE_DATA)
     elif form.add_hooks.data:
         form.hooks.append_entry(DEFAULT_HOOK_DATA)
     elif removeFieldListEntry(form.yarns):
-        # form_submit = False
         pass
     elif removeFieldListEntry(form.needles):
-        # form_submit = False
         pass
     elif removeFieldListEntry(form.hooks):
-        # form_submit = False
         pass
     elif g.user.id == project.user.id and form.validate_on_submit():
         project.title = form.title.data or None
@@ -417,3 +409,83 @@ def unpin_project(project_id):
 
     flash('Project unpinned', 'success')
     return redirect(redirect_url)
+
+
+@app.route('/projects/log_time', methods=['GET', 'POST'])
+@login_required
+def time_log_form():
+    """Display project time logging form."""
+
+    form = ProjectTimeLogForm()
+
+    projects = Project.query.filter(Project.user_id == g.user.id).all()
+    form.project.choices = [(p.id, p.title) for p in projects]
+
+    if form.validate_on_submit():
+        project_id = form.project.data
+        project = Project.query.get(project_id)
+
+        if project.user_id != g.user.id:
+            flash('Unathorized', 'danger')
+            return redirect("/")
+
+        log = TimeLog(
+            project_id=project.id,
+            date=form.date.data,
+            hours=form.hours.data,
+            minutes=form.minutes.data,
+            notes=form.notes.data
+        )
+
+        project.time_logs.append(log)
+        db.session.commit()
+
+        flash('Project log created.', 'success')
+        return redirect(f'/projects/{log.project_id}')
+
+    return render_template('projects/time-log.html',form=form)
+
+
+@app.get('/projects/<int:project_id>/log_time')
+@login_required
+def selected_project_time_log_form(project_id):
+    """Display project time logging form."""
+
+    form = ProjectTimeLogForm()
+
+    project = Project.query.get(project_id)
+
+    if project.user_id != g.user.id:
+        flash('Unathorized', 'danger')
+        return redirect("/")
+
+    form.project.choices = [(project.id, project.title)]
+    form.project.data = project.id
+
+    return render_template('projects/time-log.html',form=form)
+
+
+@app.route('/logs/<int:log_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_time_log(log_id):
+    """Display project time logging form."""
+
+    log = TimeLog.query.get_or_404(log_id)
+    form = EditTimeLogForm(obj=log)
+
+    if log.project.user_id != g.user.id:
+        flash('Unathorized', 'danger')
+        return redirect("/")
+
+    if form.validate_on_submit():
+        log.date = form.date.data
+        log.hours = form.hours.data
+        log.minutes = form.minutes.data
+        log.notes = form.notes.data
+
+        db.session.commit()
+
+        flash('Project log edited.', 'success')
+        return redirect(f'/projects/{log.project_id}')
+
+    return render_template('projects/edit-log.html',form=form, log=log)

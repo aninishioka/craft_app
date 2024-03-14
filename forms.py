@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, TextAreaField, IntegerField, SelectField, FieldList, FormField, Form, SubmitField
+from wtforms import StringField, PasswordField, TextAreaField, IntegerField, SelectField, FieldList, FormField, Form, SubmitField, DateField
 from wtforms.validators import InputRequired, Length, Email, Optional, URL, NumberRange
 
 
@@ -264,34 +264,53 @@ class EditProjectForm(NewProjectForm):
     """Form to edit a project."""
 
 
-# class EditProjectForm(FlaskForm):
-#     """Form to edit a project."""
+class ProjectTimeLogForm(FlaskForm):
+    """Form to log time worked on a project."""
 
-#     title = StringField(
-#         "Title",
-#         validators=[Optional(), Length(max=100)],
-#     )
+    project = SelectField(
+        "Select Project",
+        validate_choice=[InputRequired()]
+    )
 
-#     pattern = StringField(
-#         "Pattern Name",
-#         validators=[Optional(), Length(max=100)]
-#     )
+    date = DateField(
+        "Date",
+        validators=[InputRequired()]
+    )
 
-#     designer = StringField(
-#         "Pattern designer",
-#         validators=[Optional(), Length(max=100)]
-#     )
+    hours = IntegerField(
+        "Hours",
+        validators=[Optional(), NumberRange(min=0, max=23)]
+    )
 
-#     needles = StringField(
-#         "Needles",
-#         validators=[Optional(), Length(max=50)]
-#     )
+    minutes = IntegerField(
+        "Minutes",
+        validators=[InputRequired(), NumberRange(min=0, max=59)]
+    )
 
-#     yarns = FieldList(
-#         FormField(YarnForm)
-#     )
+    notes = TextAreaField(
+        "Notes",
+        validators=[Optional()]
+    )
 
-#     content = TextAreaField(
-#         "Notes",
-#         validators=[Optional()]
-#     )
+class EditTimeLogForm(FlaskForm):
+    """Time intervals spent on a project."""
+
+    date = DateField(
+        "Date",
+        validators=[InputRequired()]
+    )
+
+    hours = IntegerField(
+        "Hours",
+        validators=[Optional(), NumberRange(min=0, max=23)]
+    )
+
+    minutes = IntegerField(
+        "Minutes",
+        validators=[InputRequired(), NumberRange(min=0, max=59)]
+    )
+
+    notes = TextAreaField(
+        "Notes",
+        validators=[Optional()]
+    )

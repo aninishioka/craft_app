@@ -1,31 +1,51 @@
 {% macro create_project_card(project) %}
 <div class="col-lg-3 col-md-6 col-12 mt-2">
-    <div class="card project-card">
-      <div class="card-header">
-        <form>
-          {{ g.csrf_form.hidden_tag() }}
-          <input type="hidden" name="came_from" value="{{request.url}}">
-          {% if project.pinned %}
-            <button formaction="/projects/{{project.id}}/unpin" formmethod="POST" class="btn btn-outline-primary project-card-btn">
-              <i class="bi bi-pin-angle-fill"></i>
-            </button>
-            {% else %}
-            <button formaction="/projects/{{project.id}}/pin"  formmethod="POST" class="btn btn-outline-primary project-card-btn">
-              <i class="bi bi-pin-angle"></i>
-            </button>
-          {% endif %}
-        </form>
-      </div>
-      <div class="card-body">
-        <h5 class="card-title">{{ project.title }}</h5>
-        <a href="/projects/{{project.id}}" class="stretched-link"></a>
-      </div>
+  <div class="card project-card">
+    <div class="card-header">
+      <form>
+        {{ g.csrf_form.hidden_tag() }}
+        <input type="hidden" name="came_from" value="{{request.url}}">
+        {% if project.pinned %}
+        <button formaction="/projects/{{project.id}}/unpin" formmethod="POST"
+          class="btn btn-outline-primary project-card-btn">
+          <i class="bi bi-pin-angle-fill"></i>
+        </button>
+        {% else %}
+        <button formaction="/projects/{{project.id}}/pin" formmethod="POST"
+          class="btn btn-outline-primary project-card-btn">
+          <i class="bi bi-pin-angle"></i>
+        </button>
+        {% endif %}
+      </form>
     </div>
+    <div class="card-body">
+      <h5 class="card-title">{{ project.title }}</h5>
+      <a href="/projects/{{project.id}}" class="stretched-link"></a>
+    </div>
+  </div>
 </div>
 {% endmacro %}
 
-{% macro display_errors(field) %}
-  {% for error in field.errors %}
-    <span class="text-danger">{{ error }}</span>
-  {% endfor %}
+
+{% macro create_log_card(log) %}
+<div class="card project-card mb-2">
+  <div class="card-header">
+    {{ log.date }}
+    <a href="/logs/{{log.id}}/edit" class="btn btn-secondary">
+      <i class="bi bi-pencil"></i>
+    </a>
+  </div>
+  <div class="card-body">
+    Duration: {{ prettify_time(log.hours, log.minutes) }}
+    <p class="card-text">Notes: {{ log.notes }}</p>
+  </div>
+</div>
 {% endmacro %}
+
+
+{% macro prettify_time(hours, minutes) %}
+{{ hours ~ ' hour' if hours and hours < 2 else hours ~ ' hours' if hours else '' }} {{0 ~ minutes if minutes < 10 and
+  not hours else minutes}} minutes {% endmacro %} {% macro display_errors(field) %} {% for error in field.errors %}
+  <span class="text-danger">{{ error }}</span>
+  {% endfor %}
+  {% endmacro %}

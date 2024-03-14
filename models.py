@@ -204,6 +204,12 @@ class Project(db.Model):
         cascade="all, delete-orphan"
     )
 
+    time_logs = db.relationship(
+        'TimeLog',
+        backref='project',
+        cascade="all, delete-orphan"
+    )
+
 
 
 class Yarn(db.Model):
@@ -286,6 +292,47 @@ class Hook(db.Model):
         db.String(25),
         primary_key=True
     )
+
+class TimeLog(db.Model):
+    """Time intervals spent on a project."""
+
+    __tablename__ = 'time_logs'
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+        autoincrement=True
+    )
+
+    project_id = db.Column(
+        db.Integer,
+        db.ForeignKey('projects.id')
+    )
+
+# TODO: add default
+    date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    hours = db.Column(
+        db.Integer,
+        nullable=False,
+        default=0
+    )
+
+    minutes = db.Column(
+        db.Integer,
+        nullable=False,
+        default=0
+    )
+
+    notes = db.Column(
+        db.Text,
+        nullable=False,
+        default=''
+    )
+
 
 # class Gauge(db.Model):
 #     """Gauge details."""

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from 'projects/macros.html' import create_log_card %}
 
 {% block content %}
 
@@ -10,6 +11,9 @@
     <input type="hidden" name="came_from" value="{{request.url}}">
     <button formaction="/projects/{{project.id}}/edit" class="btn btn-secondary">
       <i class="bi bi-pencil"></i> Edit
+    </button>
+    <button formaction="/projects/{{project.id}}/log_time" class="btn btn-success">
+      <i class="bi bi-pencil"></i> Log Time
     </button>
     {% if project.pinned %}
       <button formaction="/projects/{{project.id}}/unpin" formmethod="POST" class="btn btn-primary">
@@ -64,8 +68,8 @@
         <br>
         {% if yarn.num_skeins and (yarn.skein_weight or yarn.skein_length) %}
           Amount: {{ yarn.num_skeins }} =
-          {{ (yarn.num_skeins or 0) * (yarn.skein_length or 0)}} {{ yarn.skein_length_unit}} /
-           {{ (yarn.num_skeins or 0) * (yarn.skein_weight or 0)}} {{ yarn.skein_weight_unit}}
+          {{ (yarn.num_skeins or 0) * (yarn.skein_length or 0) }} {{ yarn.skein_length_unit}} /
+          {{ (yarn.num_skeins or 0) * (yarn.skein_weight or 0) }} {{ yarn.skein_weight_unit}}
         {% endif %}
         {% if not loop.last %}
           <br>
@@ -74,6 +78,11 @@
       {% endfor %}
     {% endif %}
   {% endif %}
+
+  <h2>Logs:</h2>
+  {% for log in project.time_logs %}
+      {{ create_log_card(log) }}
+  {% endfor %}
 
   <h2>Notes:</h2>
   <p>{{ project.content }}</p>
