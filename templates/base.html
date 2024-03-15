@@ -35,7 +35,7 @@
             <span class="visually-hidden">new notifications</span>
             {% endif %}
           </a>
-        <a href="/users/{{g.user.id}}" class="nav-link">Profile</a>
+        <a href="/profile" class="nav-link">Profile</a>
         <a href="/settings" class="nav-link">Settings</a>
         <form action="/logout" method="POST">
           {{ g.csrf_form.hidden_tag() }}

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+<!-- for testing profile page -->
 <div class="container user-profile">
   {% if g.user.id == user.id %}
   <form>
@@ -19,19 +19,22 @@
     <div class="card side-bar me-5">
       <div class="card-body text-center">
         <h5 class="card-title mb-3">{{ user.username }}</h5>
-        <form action="/users/{{user.id}}/follow">
+        <form>
           {{ g.csrf_form.hidden_tag() }}
           <input type="hidden" name="came_from" value="{{request.url}}">
           {% if g.user.id != user.id %}
             {% if user in g.user.following %}
+            <!-- for testing unfollow button -->
               <button formaction="/users/{{user.id}}/unfollow" formmethod="POST" class="btn btn-secondary mb-2">
                 Unfollow
               </button>
             {% elif user in g.user.requests_made %}
+            <!-- for testing cancel request button -->
               <button formaction="/users/{{user.id}}/cancel_request" formmethod="POST" class="btn btn-primary mb-2">
                 Requested
               </button>
             {% else %}
+            <!-- for testing follow button -->
               <button formaction="/users/{{user.id}}/follow" formmethod="POST" class="btn btn-secondary mb-2">
                 Follow
               </button>

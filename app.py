@@ -8,10 +8,6 @@ from functools import wraps
 from utils import removeFieldListEntry
 
 
-DEFAULT_NEEDLE_DATA = {'size': 'US 00000000 - 0.5 mm'}
-DEFAULT_HOOK_DATA = {'size': '0.6 mm'}
-
-
 load_dotenv()
 
 
@@ -23,6 +19,8 @@ app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 connect_db(app)
 
 
+DEFAULT_NEEDLE_DATA = {'size': 'US 00000000 - 0.5 mm'}
+DEFAULT_HOOK_DATA = {'size': '0.6 mm'}
 CURR_USER_KEY = 'user'
 
 
@@ -130,7 +128,7 @@ def signup():
 
             login_user(user)
 
-            return redirect(f'/users/{user.id}')
+            return redirect('/profile')
 
         except IntegrityError:
             flash('Username or email already in use.', 'danger')
@@ -156,7 +154,7 @@ def login():
         if user:
             login_user(user)
             flash(f'Hello, {user.username}', 'success')
-            return redirect(f'/users/{user.id}')
+            return redirect('/profile')
 
         flash('Invalid credentials.', 'danger')
 
@@ -198,16 +196,15 @@ def user_list():
     return render_template('users/user_list.html', users=users)
 
 
-@app.get('/users/<int:user_id>')
+@app.get('/profile')
 @login_required
-@check_authorization
-def user_page(user_id):
-    """Show user profile."""
+def user_profile():
+    """User profile."""
 
-    user = User.query.get_or_404(user_id)
+    user = User.query.get_or_404(g.user.id)
 
     projects = Project.query.filter(
-        Project.user_id == user_id
+        Project.user_id == user.id
         ).order_by(
             Project.pinned.desc(), Project.created_at.desc()
         )
@@ -248,9 +245,24 @@ def notifications():
         Request.user_being_requested_id == g.user.id
     ).all()
 
-    print(follow_requests)
-
     return render_template('users/notifications.html', follow_requests = follow_requests)
+
+
+@app.get('/users/<int:user_id>')
+@login_required
+@check_authorization
+def user_page(user_id):
+    """Show user profile."""
+
+    user = User.query.get_or_404(user_id)
+
+    projects = Project.query.filter(
+        Project.user_id == user_id
+        ).order_by(
+            Project.pinned.desc(), Project.created_at.desc()
+        )
+
+    return render_template('users/projects.html', user=user, projects=projects)
 
 
 @app.post('/users/private')
