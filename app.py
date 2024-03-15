@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 from flask import Flask, g, redirect, render_template, session, flash, request
-from sqlalchemy import alias
 from sqlalchemy.exc import IntegrityError
 from models import db, connect_db, User, Project, Needle, Hook, Yarn, TimeLog, Request
 from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm, EditProjectForm, ProjectTimeLogForm, EditTimeLogForm, EditUserForm

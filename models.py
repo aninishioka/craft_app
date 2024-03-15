@@ -87,7 +87,7 @@ class User(db.Model):
         default=False
     )
 
-    projects = db.relationship('Project', backref='user', cascade="all, delete-orphan")
+    projects = db.relationship('Project', backref='user')
 
     followers = db.relationship(
         'User',
@@ -165,7 +165,7 @@ class ProjectNeedle(db.Model):
 
     project_id = db.Column(
         db.Integer,
-        db.ForeignKey('projects.id')
+        db.ForeignKey('projects.id', ondelete="cascade")
     )
 
     needle_size = db.Column(
@@ -187,10 +187,10 @@ class ProjectHook(db.Model):
 
     project_id = db.Column(
         db.Integer,
-        db.ForeignKey('projects.id')
+        db.ForeignKey('projects.id', ondelete="cascade")
     )
 
-    needle_size = db.Column(
+    hook_size = db.Column(
         db.String(25),
         db.ForeignKey('hooks.size')
     )
@@ -249,18 +249,12 @@ class Project(db.Model):
         nullable=False
     )
 
-    yarns = db.relationship('Yarn', backref='project', cascade="all, delete-orphan")
+    yarns = db.relationship('Yarn', backref='project')
 
     needles = db.relationship(
         'Needle',
         secondary='projects_needles',
         backref='projects'
-    )
-
-    projects_needles = db.relationship(
-        'ProjectNeedle',
-        backref='project',
-        cascade="all, delete-orphan"
     )
 
     hooks = db.relationship(
@@ -269,19 +263,7 @@ class Project(db.Model):
         backref='projects'
     )
 
-    projects_hooks = db.relationship(
-        'ProjectHook',
-        backref='project',
-        cascade="all, delete-orphan"
-    )
-
-    time_logs = db.relationship(
-        'TimeLog',
-        backref='project',
-        cascade="all, delete-orphan"
-    )
-
-
+    time_logs = db.relationship('TimeLog', backref='project')
 
 class Yarn(db.Model):
     """Yarn details."""
@@ -296,7 +278,7 @@ class Yarn(db.Model):
 
     project_id = db.Column(
         db.Integer,
-        db.ForeignKey('projects.id')
+        db.ForeignKey('projects.id', ondelete="cascade")
     )
 
     yarn_name = db.Column(
@@ -377,7 +359,7 @@ class TimeLog(db.Model):
 
     project_id = db.Column(
         db.Integer,
-        db.ForeignKey('projects.id')
+        db.ForeignKey('projects.id', ondelete="cascade")
     )
 
 # TODO: add default
