@@ -17,13 +17,13 @@ class Follow(db.Model):
 
     user_being_followed_id = db.Column(
         db.Integer,
-        db.ForeignKey('users.id'),
+        db.ForeignKey('users.id', ondelete="cascade"),
         primary_key=True
     )
 
     user_following_id = db.Column(
         db.Integer,
-        db.ForeignKey('users.id'),
+        db.ForeignKey('users.id', ondelete="cascade"),
         primary_key=True
     )
 
@@ -36,13 +36,13 @@ class Request(db.Model):
 
     user_being_requested_id = db.Column(
         db.Integer,
-        db.ForeignKey('users.id'),
+        db.ForeignKey('users.id', ondelete="cascade"),
         primary_key=True
     )
 
     user_requesting_id = db.Column(
         db.Integer,
-        db.ForeignKey('users.id'),
+        db.ForeignKey('users.id', ondelete="cascade"),
         primary_key=True
     )
 

@@ -228,7 +228,7 @@ def settings():
 
         user.username = form.username.data
         user.email = form.email.data
-        user.image_url = form.image_url.data
+        user.image_url = form.image_url.data or None
 
         db.session.commit()
 
