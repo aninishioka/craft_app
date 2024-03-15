@@ -22,11 +22,11 @@
       <div class="mb-5">
         <h2>Account Privacy</h2>
         {% if g.user.private %}
-          <button formaction="/users/unprivate" formmethod="POST" class="btn btn-primary mb-2">
+          <button formaction="/settings/unprivate" formmethod="POST" class="btn btn-primary mb-2">
             Make account public
           </button>
         {% else %}
-          <button formaction="/users/private" formmethod="POST" class="btn btn-primary mb-2">
+          <button formaction="/settings/private" formmethod="POST" class="btn btn-primary mb-2">
             Make account private
           </button>
         {% endif %}

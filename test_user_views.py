@@ -15,6 +15,8 @@ db.create_all()
 
 app.config['WTF_CSRF_ENABLED'] = False
 
+NONEXISTENT_USER_ID = 0
+
 
 class UserBaseViewTestCase(TestCase):
     def setUp(self):
@@ -483,8 +485,426 @@ class UserPageTestCase(UserBaseViewTestCase):
             self.assertIn('for testing profile page', html)
             self.assertNotIn('Account is private', html)
 
+    # def test_nonexistent_user_page(self):
+    #     """Test unauthorized access to user page"""
+
+    #     with app.test_client() as client:
+
+    #         print('*******************', f'/users/{NONEXISTENT_USER_ID}')
+
+    #         resp = client.get(f'/users/{NONEXISTENT_USER_ID}', follow_redirects=True)
+
+    #         self.assertEqual(resp.status_code, 404)
+
 
 class UserPrivateTestCase(UserBaseViewTestCase):
     def test_private_user(self):
         """Test privating user"""
-        pass
+
+        with app.test_client() as client:
+            with client.session_transaction() as session:
+                session[CURR_USER_KEY] = self.u1_id
+
+            resp = client.post('/settings/private', follow_redirects=True)
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Account now private', html)
+            self.assertIn('for testing settings page', html)
+
+    def test_unathorized_private_user(self):
+        """Test unauthorized privating of user"""
+
+        with app.test_client() as client:
+            resp = client.post('/settings/private', follow_redirects=True)
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Unauthorized', html)
+            self.assertIn('for testing anon home', html)
+
+    def test_unprivate_user(self):
+        """Test unprivating user"""
+
+        with app.test_client() as client:
+            with client.session_transaction() as session:
+                session[CURR_USER_KEY] = self.u1_id
+
+            resp = client.post('/settings/unprivate', follow_redirects=True)
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Account now public', html)
+            self.assertIn('for testing settings page', html)
+
+    def test_unathorized_unprivate_user(self):
+        """Test unauthorized unprivating of user"""
+
+        with app.test_client() as client:
+            resp = client.post('/settings/unprivate', follow_redirects=True)
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Unauthorized', html)
+            self.assertIn('for testing anon home', html)
+
+class UserFollowingPageTestCase(UserBaseViewTestCase):
+    def test_user_following_page(self):
+        """Test user following page"""
+
+        with app.test_client() as client:
+            with client.session_transaction() as session:
+                session[CURR_USER_KEY] = self.u1_id
+
+            u1 = User.query.get(self.u1_id)
+            u2 = User.query.get(self.u2_id)
+
+            u1.following.append(u2)
+            db.session.commit()
+
+            resp = client.get(f'/users/{self.u1_id}/following')
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('for testing following page', html)
+            self.assertIn('u2', html)
+
+    def test_unathorized_user_following_page(self):
+        """Test unauthorized access to user following page"""
+
+        with app.test_client() as client:
+            resp = client.get(
+                f'/users/{self.u1_id}/following',
+                follow_redirects=True
+            )
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Unauthorized', html)
+            self.assertIn('for testing anon home', html)
+
+    # def test_nonexistent_user_following_page(self):
+    #     """Test access to nonexistent user's following page"""
+
+    #     with app.test_client() as client:
+    #         resp = client.get(
+    #             f'/users/{NONEXISTENT_USER_ID}/following',
+    #             follow_redirects=True
+    #         )
+
+    #         self.assertEqual(resp.status_code, 404)
+
+class UserFollowersPageTestCase(UserBaseViewTestCase):
+    def test_user_followers_page(self):
+        """Test user followers page"""
+
+        with app.test_client() as client:
+            with client.session_transaction() as session:
+                session[CURR_USER_KEY] = self.u1_id
+
+            u1 = User.query.get(self.u1_id)
+            u2 = User.query.get(self.u2_id)
+
+            u1.followers.append(u2)
+            db.session.commit()
+
+            resp = client.get(f'/users/{self.u1_id}/followers')
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('for testing followers page', html)
+            self.assertIn('u2', html)
+
+    def test_unathorized_user_followers_page(self):
+        """Test unauthorized access to user followers page"""
+
+        with app.test_client() as client:
+            resp = client.get(
+                f'/users/{self.u1_id}/followers',
+                follow_redirects=True
+            )
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Unauthorized', html)
+            self.assertIn('for testing anon home', html)
+
+    # def test_nonexistent_user_followers_page(self):
+    #     """Test access to nonexistent user's followers page"""
+
+    #     with app.test_client() as client:
+    #         resp = client.get(
+    #             f'/users/{NONEXISTENT_USER_ID}/followers',
+    #             follow_redirects=True
+    #         )
+
+    #         self.assertEqual(resp.status_code, 404)
+
+
+class UserDeleteTestCase(UserBaseViewTestCase):
+    def test_user_delete(self):
+        """Test deleting user"""
+
+        with app.test_client() as client:
+            with client.session_transaction() as session:
+                session[CURR_USER_KEY] = self.u1_id
+
+            resp = client.post(
+                f'/users/delete',
+                follow_redirects=True
+                )
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('for testing signup page', html)
+            self.assertIn('User deleted', html)
+
+    def test_unathorized_user_delete(self):
+        """Test unauthorized deleting user"""
+
+        with app.test_client() as client:
+            resp = client.post(
+                f'/users/delete',
+                follow_redirects=True
+                )
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Unauthorized', html)
+            self.assertIn('for testing anon home', html)
+
+class UserFollowTestCase(UserBaseViewTestCase):
+    def test_follow_public_user(self):
+        """Test follow public user"""
+
+        with app.test_client() as client:
+            with client.session_transaction() as session:
+                session[CURR_USER_KEY] = self.u1_id
+
+            resp = client.post(
+                f'/users/{self.u2_id}/follow',
+                data={'came_from': f'/users'},
+                follow_redirects=True
+                )
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Now following', html)
+            self.assertIn('Unfollow', html)
+            self.assertIn('for testing user list', html)
+
+    def test_unauthorized_follow_user(self):
+        """Test unauthorized follow user"""
+
+        with app.test_client() as client:
+            resp = client.post(
+                f'/users/{self.u2_id}/follow',
+                data={'came_from': f'/users/{self.u2_id}'},
+                follow_redirects=True
+                )
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Unauthorized', html)
+            self.assertIn('for testing anon home', html)
+
+    def test_follow_private_user(self):
+        """Test follow private user"""
+
+        with app.test_client() as client:
+            with client.session_transaction() as session:
+                session[CURR_USER_KEY] = self.u1_id
+
+            u2 = User.query.get(self.u2_id)
+            u2.private = True
+            db.session.commit()
+
+            resp = client.post(
+                f'/users/{self.u2_id}/follow',
+                data={'came_from': f'/users/{self.u2_id}'},
+                follow_redirects=True
+                )
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Request sent to', html)
+            self.assertIn('Requested', html)
+            self.assertIn('for testing profile page', html)
+
+    def test_unauthorized_follow_private_user(self):
+        """Test unauthorized follow private user"""
+
+        with app.test_client() as client:
+            u2 = User.query.get(self.u2_id)
+            u2.private = True
+            db.session.commit()
+
+            resp = client.post(
+                f'/users/{self.u2_id}/follow',
+                data={'came_from': f'/users/{self.u2_id}'},
+                follow_redirects=True
+                )
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Unauthorized', html)
+            self.assertIn('for testing anon home', html)
+
+    def test_unauthorized_follow_private_user(self):
+        """Test unauthorized follow private user"""
+
+        with app.test_client() as client:
+            u2 = User.query.get(self.u2_id)
+            u2.private = True
+            db.session.commit()
+
+            resp = client.post(
+                f'/users/{self.u2_id}/follow',
+                data={'came_from': f'/users/{self.u2_id}'},
+                follow_redirects=True
+                )
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Unauthorized', html)
+            self.assertIn('for testing anon home', html)
+
+class UserRequestTestCase(UserBaseViewTestCase):
+    def test_cancel_follow_request(self):
+        """Test cancel follow request"""
+
+        with app.test_client() as client:
+            with client.session_transaction() as session:
+                session[CURR_USER_KEY] = self.u1_id
+
+            u1 = User.query.get(self.u1_id)
+            u2 = User.query.get(self.u2_id)
+
+            u1.requests_made.append(u2)
+            db.session.commit()
+
+            resp = client.post(
+                f'/users/{self.u2_id}/cancel_request',
+                data={'came_from': f'/users/{self.u2_id}'},
+                follow_redirects=True
+                )
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Canceled follow request', html)
+            self.assertIn('for testing profile page', html)
+            self.assertIn('follow', html)
+
+    def test_unauthorized_cancel_follow_request(self):
+        """Test unauthorized cancel follow request"""
+
+        with app.test_client() as client:
+            u1 = User.query.get(self.u1_id)
+            u2 = User.query.get(self.u2_id)
+
+            u1.requests_made.append(u2)
+            db.session.commit()
+
+            resp = client.post(
+                f'/users/{self.u2_id}/cancel_request',
+                data={'came_from': f'/users/{self.u2_id}'},
+                follow_redirects=True
+                )
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Unauthorized', html)
+            self.assertIn('for testing anon home', html)
+
+    def test_confirm_follow_request(self):
+        """Test confirming follow request"""
+        with app.test_client() as client:
+            with client.session_transaction() as session:
+                session[CURR_USER_KEY] = self.u1_id
+
+            u1 = User.query.get(self.u1_id)
+            u2 = User.query.get(self.u2_id)
+
+            u2.requests_made.append(u1)
+            db.session.commit()
+
+            resp = client.post(f'requests/{u2.id}/confirm', follow_redirects=True)
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn(f'{u2.username} is following you now', html)
+            self.assertIn('for testing notifications page', html)
+
+    def test_unauthorized_confirm_follow_request(self):
+        """Test unauthorized confirmation of follow request"""
+        with app.test_client() as client:
+            u1 = User.query.get(self.u1_id)
+            u2 = User.query.get(self.u2_id)
+
+            u2.requests_made.append(u1)
+            db.session.commit()
+
+            resp = client.post(f'requests/{u2.id}/confirm', follow_redirects=True)
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn(f'Unauthorized', html)
+            self.assertIn('for testing anon home', html)
+
+    def test_delete_follow_request(self):
+        """Test deleting follow request"""
+        with app.test_client() as client:
+            with client.session_transaction() as session:
+                session[CURR_USER_KEY] = self.u1_id
+
+            u1 = User.query.get(self.u1_id)
+            u2 = User.query.get(self.u2_id)
+
+            u2.requests_made.append(u1)
+            db.session.commit()
+
+            resp = client.post(f'requests/{u2.id}/delete', follow_redirects=True)
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn(f'Deleted follow request', html)
+            self.assertIn('for testing notifications page', html)
+
+    def test_unauthorized_delete_follow_request(self):
+        """Test unauthorized deletion of follow request"""
+        with app.test_client() as client:
+            u1 = User.query.get(self.u1_id)
+            u2 = User.query.get(self.u2_id)
+
+            u2.requests_made.append(u1)
+            db.session.commit()
+
+            resp = client.post(f'requests/{u2.id}/delete', follow_redirects=True)
+
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn(f'Unauthorized', html)
+            self.assertIn('for testing anon home', html)
+
+

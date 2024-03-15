@@ -35,8 +35,8 @@
             <span class="visually-hidden">new notifications</span>
             {% endif %}
           </a>
+          <a href="/conversations" class="btn btn-outline-secondary position-relative"><i class="bi bi-chat-dots"></i></a>
         <a href="/profile" class="nav-link">Profile</a>
-        <a href="/settings" class="nav-link">Settings</a>
         <form action="/logout" method="POST">
           {{ g.csrf_form.hidden_tag() }}
           <button type="submit" class="btn btn-outline-secondary">Log out</button>

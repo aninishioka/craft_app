@@ -2,6 +2,7 @@
 {% from '/users/macros.html' import create_user_card %}
 
 {% block profile_content %}
+<!-- for testing following page -->
 <div class="row flex-fill">
   {% for user in user.following %}
     {{ create_user_card(user) }}

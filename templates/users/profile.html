@@ -3,18 +3,6 @@
 {% block content %}
 <!-- for testing profile page -->
 <div class="container user-profile">
-  {% if g.user.id == user.id %}
-  <form>
-    {{ g.csrf_form.hidden_tag() }}
-    <button formaction="/projects/new" class="btn btn-secondary mb-2">
-      Add Project
-    </button>
-    <button formaction="/projects/log_time" class="btn btn-success mb-2">
-      Log time
-    </button>
-  </form>
-  {% endif %}
-
   <div class="d-flex">
     <div class="card side-bar me-5">
       <div class="card-body text-center">
@@ -22,7 +10,20 @@
         <form>
           {{ g.csrf_form.hidden_tag() }}
           <input type="hidden" name="came_from" value="{{request.url}}">
-          {% if g.user.id != user.id %}
+          {% if g.user.id == user.id %}
+          <form>
+            {{ g.csrf_form.hidden_tag() }}
+            <button formaction="/settings" class="btn btn-secondary mb-2">
+              Settings
+            </button>
+            <button formaction="/projects/new" class="btn btn-success mb-2">
+              Add Project
+            </button>
+            <button formaction="/projects/log_time" class="btn btn-success mb-2">
+              Log time
+            </button>
+          </form>
+          {% elif g.user.id != user.id %}
             {% if user in g.user.following %}
             <!-- for testing unfollow button -->
               <button formaction="/users/{{user.id}}/unfollow" formmethod="POST" class="btn btn-secondary mb-2">

@@ -105,6 +105,12 @@ class User(db.Model):
         backref="requests_made",
     )
 
+    converations = db.relationship(
+        'Conversation',
+        secondary='participants',
+        backref='users'
+    )
+
     @classmethod
     def signup(cls, username, email, image_url, password):
         """Creates new user with hashed password and adds to session."""
@@ -385,6 +391,76 @@ class TimeLog(db.Model):
         nullable=False,
         default=''
     )
+
+
+class Conversation(db.Model):
+    """Chat conversation between users."""
+
+    __tablename__ = 'conversations'
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+        autoincrement=True
+    )
+
+
+class Participant(db.Model):
+    """Join table for users <--> conversations."""
+
+    __tablename__ = 'participants'
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+        autoincrement=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+    )
+
+    conversation_id = db.Column(
+        db.Integer,
+        db.ForeignKey('conversations.id', ondelete='cascade')
+    )
+
+
+class Message(db.Model):
+    """Messages in a conversation."""
+
+    __tablename__ = 'messages'
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+        autoincrement=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+    )
+
+    conversation_id = db.Column(
+        db.Integer,
+        db.ForeignKey('conversations.id', ondelete='cascade')
+    )
+
+    text = db.Column(
+        db.Text,
+        nullable=False,
+        default=''
+    )
+
+    created_at = db.Column(
+        db.DateTime(timezone=True),
+        default=datetime.utcnow,
+        nullable=False
+    )
+
+    conversation = db.relationship('Conversation', backref='messages')
 
 
 # class Gauge(db.Model):

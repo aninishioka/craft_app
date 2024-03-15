@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, g, redirect, render_template, session, flash, request
 from sqlalchemy.exc import IntegrityError
-from models import db, connect_db, User, Project, Needle, Hook, Yarn, TimeLog, Request
+from models import db, connect_db, User, Project, Needle, Hook, Yarn, TimeLog, Request, Conversation, Participant
 from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm, EditProjectForm, ProjectTimeLogForm, EditTimeLogForm, EditUserForm
 from functools import wraps
 from utils import removeFieldListEntry
@@ -265,7 +265,7 @@ def user_page(user_id):
     return render_template('users/projects.html', user=user, projects=projects)
 
 
-@app.post('/users/private')
+@app.post('/settings/private')
 @login_required
 def private_account():
     """Handle privating account."""
@@ -283,7 +283,7 @@ def private_account():
     return render_template('users/settings.html', form=form)
 
 
-@app.post('/users/unprivate')
+@app.post('/settings/unprivate')
 @login_required
 def unprivate_account():
     """Handle unprivating account."""
@@ -743,3 +743,29 @@ def edit_time_log(log_id):
         return redirect(f'/projects/{log.project_id}')
 
     return render_template('projects/edit-log.html',form=form, log=log)
+
+
+##############################################################################
+# Conversation routes:
+
+@app.get('/conversations')
+@login_required
+def conversations_page():
+    """Display conversations page."""
+
+    conversation_ids = [
+        c.conversation_id for c
+        in Participant.query.filter(Participant.user_id == g.user.id)]
+
+    conversations = db.session.query(
+        Conversation.id,
+        Participant.user_id
+        ).outerjoin(
+            Participant, Participant.user_id != g.user.id
+        ).filter(
+            Conversation.id in conversation_ids
+        )
+    # conversations = Conversation.query.filter(Conversation.id in conversation_ids)
+
+    return render_template('conversations/conversation_list.html', conversations = conversations)
+
