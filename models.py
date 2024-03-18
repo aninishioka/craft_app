@@ -90,7 +90,7 @@ class User(db.Model):
         default=False
     )
 
-    projects = db.relationship('Project', backref='user')
+    projects = db.relationship('Project', backref='user', cascade="all, delete-orphan")
 
     followers = db.relationship(
         'User',
@@ -198,7 +198,7 @@ class ProjectNeedle(db.Model):
 
     needle_size = db.Column(
         db.String(25),
-        db.ForeignKey('needles.size')
+        db.ForeignKey('needles.size', ondelete="cascade")
     )
 
 
@@ -220,7 +220,7 @@ class ProjectHook(db.Model):
 
     hook_size = db.Column(
         db.String(25),
-        db.ForeignKey('hooks.size')
+        db.ForeignKey('hooks.size', ondelete="cascade")
     )
 
 
@@ -237,7 +237,7 @@ class Project(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('users.id'),
+        db.ForeignKey('users.id', ondelete='cascade'),
         nullable=False
     )
 
@@ -440,7 +440,7 @@ class Participant(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('users.id'),
+        db.ForeignKey('users.id', ondelete="cascade"),
     )
 
     conversation_id = db.Column(

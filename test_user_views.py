@@ -252,7 +252,7 @@ class UserLogoutTestCase(UserBaseViewTestCase):
             self.assertIn('Logged out', html)
 
     def test_unauthorized_logout(self):
-        """Test unathorized user logout"""
+        """Test unauthorized user logout"""
         with app.test_client() as client:
 
             resp = client.post('/logout', follow_redirects=True)
@@ -279,7 +279,7 @@ class UserProfileTestCase(UserBaseViewTestCase):
             self.assertIn('for testing profile page', html)
             self.assertIn('u1', html)
 
-    def test_unathorized_profile_page(self):
+    def test_unuathorized_profile_page(self):
         """Test unauthorized user profile page access."""
         with app.test_client() as client:
 
@@ -306,7 +306,7 @@ class UserSettingsTestCase(UserBaseViewTestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn('for testing settings page', html)
 
-    def test_unathorized_get_settings_page(self):
+    def test_unauthorized_get_settings_page(self):
         """Test unauthorized user setting page access."""
         with app.test_client() as client:
             resp = client.get('/settings', follow_redirects=True)
@@ -382,7 +382,7 @@ class UserNotificationsTestCase(UserBaseViewTestCase):
             self.assertIn('for testing notifications page', html)
             self.assertIn('u2', html)
 
-    def test_unathorized_notifications_page(self):
+    def test_unauthorized_notifications_page(self):
         """Test unauthorized notifications page access."""
 
         with app.test_client() as client:
@@ -513,7 +513,7 @@ class UserPrivateTestCase(UserBaseViewTestCase):
             self.assertIn('Account now private', html)
             self.assertIn('for testing settings page', html)
 
-    def test_unathorized_private_user(self):
+    def test_unauthorized_private_user(self):
         """Test unauthorized privating of user"""
 
         with app.test_client() as client:
@@ -540,7 +540,7 @@ class UserPrivateTestCase(UserBaseViewTestCase):
             self.assertIn('Account now public', html)
             self.assertIn('for testing settings page', html)
 
-    def test_unathorized_unprivate_user(self):
+    def test_unauthorized_unprivate_user(self):
         """Test unauthorized unprivating of user"""
 
         with app.test_client() as client:
@@ -574,7 +574,7 @@ class UserFollowingPageTestCase(UserBaseViewTestCase):
             self.assertIn('for testing following page', html)
             self.assertIn('u2', html)
 
-    def test_unathorized_user_following_page(self):
+    def test_unauthorized_user_following_page(self):
         """Test unauthorized access to user following page"""
 
         with app.test_client() as client:
@@ -622,7 +622,7 @@ class UserFollowersPageTestCase(UserBaseViewTestCase):
             self.assertIn('for testing followers page', html)
             self.assertIn('u2', html)
 
-    def test_unathorized_user_followers_page(self):
+    def test_unauthorized_user_followers_page(self):
         """Test unauthorized access to user followers page"""
 
         with app.test_client() as client:
@@ -668,7 +668,7 @@ class UserDeleteTestCase(UserBaseViewTestCase):
             self.assertIn('for testing signup page', html)
             self.assertIn('User deleted', html)
 
-    def test_unathorized_user_delete(self):
+    def test_unauthorized_user_delete(self):
         """Test unauthorized deleting user"""
 
         with app.test_client() as client:

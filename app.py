@@ -532,12 +532,18 @@ def add_project():
 
     return render_template('projects/create.html', form=form)
 
-
+# TODO: add testing to check authorization
 @app.get('/projects/<int:project_id>')
 @login_required
 def project_details(project_id):
     """Show project details."""
     project = Project.query.get_or_404(project_id)
+
+    other_user = User.query.get_or_404(project.user_id)
+
+    if other_user.private:
+        if g.user != other_user and not g.user.is_following(other_user):
+            return render_template('users/private.html', user=other_user)
 
     return render_template('projects/details.html', project=project)
 
@@ -872,47 +878,3 @@ def new_conversation():
         return redirect(f'/conversations/{conversation.id}')
 
     return render_template('conversations/new_conversation.html',  form= form, conversations=conversations)
-
-
-
-
-# @app.route('/conversations/new', methods=['POST', 'GET'])
-# def new_conversation():
-#     """Handle creating new conversation"""
-
-#     conversations = g.user.get_conversations()
-
-#     add_user_form = NewConversationForm()
-#     new_message_form = MessageForm()
-
-    # submit_message = True
-
-    # if add_user_form.add_user.data:
-    #     add_user_form.users.append_entry({})
-    #     submit_message = False
-    # elif removeFieldListEntry(add_user_form.users):
-    #     submit_message = False
-
-    # added_users = []
-
-    # for user_select in add_user_form.users.entries:
-    #     user_select.user.choices = [(user.id, user.username) for user in User.query.filter(User.id != g.user.id, User.id.not_in(added_users)).all()]
-    #     if (user_select.user.data):
-    #         # added_users.append(user_select.user.data)
-
-    # if submit_message:
-    #     if new_message_form.validate_on_submit():
-    #         conversation = Conversation()
-    #         db.session.add(conversation)
-    #         db.session.commit()
-
-    #         user = add_user_form.user.data
-    #         user.conversations.append(conversation)
-    #         g.user.conversations.append(conversation)
-    #         db.session.commit()
-
-    #         return redirect(f'/conversations/{conversation.id}')
-
-    # return render_template('conversations/new_conversation.html',  add_user_form= add_user_form, new_message_form=new_message_form, conversations=conversations)
-
-

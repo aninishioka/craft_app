@@ -1,6 +1,6 @@
 def removeFieldListEntry(list):
-    """Takes WTForm FormField with FieldList type and index. Removes entry
-    at index from list."""
+    """Takes WTForm FormField with FieldList type. Removes entry with
+    entry.delete.data set to True from list."""
 
     keep = [entry.data for entry in list.entries if not entry.delete.data]
 
@@ -13,8 +13,3 @@ def removeFieldListEntry(list):
         list.append_entry(entry)
 
     return len(list) != init_list_size
-
-
-def prepopulateFormFieldList(field_list, data_list):
-
-    pass
