@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import create_project_card %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    {% for project in projects %}
+      {{ create_project_card(project) }}
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% macro create_conversation_card(conversation) %}
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">
+      {% for username in conversation.usernames %}
+      {{ username }}
+      {% if not loop.last %}
+      ,
+      {% endif %}
+      {% endfor %}
+    </h5>
+    <a href="/conversations/{{conversation.conversation_id}}" class="stretched-link"></a>
+  </div>
+</div>
+{% endmacro %}

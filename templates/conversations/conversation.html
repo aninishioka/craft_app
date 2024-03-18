@@ -1,0 +1,27 @@
+{% extends 'conversations/conversation_base.html' %}
+
+{% block conversation_content %}
+<div class="p-2 border-bottom">
+  {% for participant in participants %}
+    {{ participant.username }}
+    {% if not loop.last %}
+    ,
+    {% endif %}
+  {% endfor %}
+</div>
+<div class="d-flex flex-column flex-grow-1 p-2">
+  {% for message in messages %}
+  <div class="rounded p-2 message mb-1 {{'bg-secondary-subtle align-self-end' if g.user.id == message.user_id else 'align-self-start bg-primary-subtle'}}">
+    {{message.text}}
+  </div>
+  {% endfor %}
+</div>
+<div class="border-top p-2">
+  <form class="d-flex me-5 container-fluid justify-content-center"
+    action="/conversations/{{conversation_id}}/new_message" method="POST">
+    {{ form.hidden_tag() }}
+    {{form.message(placeholder=form.message.label.text, class="form-control", id="msg-compose")}}
+    <button class="btn btn-outline-success" type="submit">Send</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'conversations/conversation_base.html' %}
+
+{% block conversation_content %}
+<div class="p-2 border-bottom">
+  <form>
+    {{ form.hidden_tag() }}
+    {{ form.user(placeholder=form.user.label.text, class="form-select")}}
+</div>
+<div class="d-flex flex-column flex-grow-1 p-2">
+</div>
+<div class="border-top p-2">
+  <div class="d-flex me-5 container-fluid justify-content-center">
+    {{ form.hidden_tag() }}
+    {{ form.message(placeholder=form.message.label.text, class="form-control", id="msg-compose")
+    }}
+    <button class="btn btn-outline-success" type="submit" formmethod="POST">Send</button>
+  </form>
+</div>
+{% endblock %}

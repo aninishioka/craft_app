@@ -1,5 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
+from sqlalchemy import String
+from sqlalchemy.sql.functions import array_agg
+from sqlalchemy.dialects.postgresql import ARRAY
 from datetime import datetime
 
 bcrypt = Bcrypt()
@@ -105,10 +108,10 @@ class User(db.Model):
         backref="requests_made",
     )
 
-    converations = db.relationship(
+    conversations = db.relationship(
         'Conversation',
         secondary='participants',
-        backref='users'
+        backref='conversations'
     )
 
     @classmethod
@@ -155,6 +158,25 @@ class User(db.Model):
 
         user_list = [user for user in self.followers if user == other_user]
         return len(user_list) == 1
+
+    def get_conversations(self):
+        """Gets information about all conversations user a participant in."""
+
+        conversation_ids = [
+        c.conversation_id for c
+        in Participant.query.filter(Participant.user_id == self.id)]
+
+        return db.session.query(
+            Participant.conversation_id,
+            array_agg(User.username, type_=ARRAY(String)).label('usernames')
+        ).outerjoin(
+            Participant
+        ).filter(
+            Participant.user_id != self.id,
+            Participant.conversation_id.in_(conversation_ids)
+        ).group_by(
+            Participant.conversation_id
+        ).all()
 
 
 class ProjectNeedle(db.Model):

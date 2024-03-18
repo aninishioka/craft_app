@@ -333,3 +333,26 @@ class EditTimeLogForm(FlaskForm):
         "Notes",
         validators=[Optional()]
     )
+
+class MessageForm(FlaskForm):
+    """Compose new message in conversation."""
+
+    message = TextAreaField(
+        "Message",
+        validators=[InputRequired()]
+    )
+
+class SelectUserForm(Form):
+    """Select user as participant in conversation"""
+
+    user = SelectField('User')
+
+    delete = SubmitField('Remove')
+
+class NewConversationForm(MessageForm):
+    """Create new conversation."""
+
+    # users = FieldList(FormField(SelectUserForm), min_entries=1)
+    user = SelectField('User', coerce=int, validators=[InputRequired()])
+
+    add_user = SubmitField("Add User")

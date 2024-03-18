@@ -4,12 +4,23 @@
   box-sizing: border-box;
 }
 
+body {
+  min-height: 100vh;
+}
+
 .card-btn {
   position: relative;
   z-index: 2;
 }
 
+/* ==================== Nav */
+
+.nav-right {
+  gap: .8em;
+}
+
 /* ==================== User profile */
+
 .user-profile .side-bar {
   width: 200px;
 }
@@ -33,4 +44,21 @@ h2.project-details-pattern {
 
 .project-details .yarn {
   margin-bottom: 1.8srem;
+}
+
+/* ==================== Conversations page */
+
+#conversation-pg-container {
+  padding: 0;
+  margin: 0;
+  min-width: 100vw;
+}
+
+#msg-compose {
+  width: 70%;
+}
+
+.message {
+  width: auto;
+  max-width: 60%;
 }

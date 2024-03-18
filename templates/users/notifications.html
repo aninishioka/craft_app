@@ -5,6 +5,9 @@
 <!-- for testing notifications page -->
 <div class="container">
   <div class="row">
+    {% if follow_requests|length == 0%}
+    No new notifications to show
+    {% endif %}
     {% for request in follow_requests %}
     {{create_request_card(request)}}
     {% endfor %}

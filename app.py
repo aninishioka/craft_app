@@ -1,9 +1,9 @@
 import os
 from dotenv import load_dotenv
 from flask import Flask, g, redirect, render_template, session, flash, request
-from sqlalchemy.exc import IntegrityError
-from models import db, connect_db, User, Project, Needle, Hook, Yarn, TimeLog, Request, Conversation, Participant
-from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm, EditProjectForm, ProjectTimeLogForm, EditTimeLogForm, EditUserForm
+from sqlalchemy.exc import IntegrityError, NoResultFound
+from models import db, connect_db, User, Project, Needle, Hook, Yarn, TimeLog, Request, Participant, Message, Conversation
+from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm, EditProjectForm, ProjectTimeLogForm, EditTimeLogForm, EditUserForm, MessageForm, NewConversationForm
 from functools import wraps
 from utils import removeFieldListEntry
 
@@ -92,11 +92,19 @@ def homepage():
     """Show homepage.
 
     - anon users: login page
-    - logged in: user profile
+    - logged in: projects of followed users
     """
 
     if g.user:
-        return redirect(f'/users/{g.user.id}')
+        following_ids = [f.id for f in g.user.following] + [g.user.id]
+
+        projects = (Project.query
+                    .filter(Project.user_id.in_(following_ids))
+                    .order_by(Project.created_at.desc())
+                    .limit(100)
+                    .all())
+
+        return render_template('home.html', projects=projects)
 
     return render_template('home-anon.html')
 
@@ -331,7 +339,7 @@ def delete_user():
     form = g.csrf_form
 
     if not form.validate_on_submit():
-        flash('Unathorized', 'danger')
+        flash('Unauthorized', 'danger')
         return redirect("/")
 
     db.session.delete(g.user)
@@ -351,7 +359,7 @@ def follow_user(user_id):
     user = User.query.get_or_404(user_id)
 
     if not form.validate_on_submit():
-        flash('Unathorized', 'danger')
+        flash('Unauthorized', 'danger')
         return redirect("/")
 
     if user.private:
@@ -379,7 +387,7 @@ def unfollow_user(user_id):
     user = User.query.get_or_404(user_id)
 
     if not form.validate_on_submit():
-        flash('Unathorized', 'danger')
+        flash('Unauthorized', 'danger')
         return redirect("/")
 
     user.followers.remove(g.user)
@@ -401,7 +409,7 @@ def cancel_follow_request(user_id):
     user = User.query.get_or_404(user_id)
 
     if not form.validate_on_submit():
-        flash('Unathorized', 'danger')
+        flash('Unauthorized', 'danger')
         return redirect("/")
 
     user.requests_received.remove(g.user)
@@ -424,7 +432,7 @@ def confirm_request(requesting_user_id):
     form = g.csrf_form
 
     if not form.validate_on_submit():
-        flash('Unathorized', 'danger')
+        flash('Unauthorized', 'danger')
         return redirect("/")
 
     follow_request = Request.query.get_or_404((g.user.id, requesting_user_id))
@@ -447,7 +455,7 @@ def delete_request(requesting_user_id):
     form = g.csrf_form
 
     if not form.validate_on_submit():
-        flash('Unathorized', 'danger')
+        flash('Unauthorized', 'danger')
         return redirect("/")
 
     follow_request = Request.query.get_or_404((g.user.id, requesting_user_id))
@@ -520,7 +528,7 @@ def add_project():
         db.session.commit()
 
         flash('New project added', 'success')
-        return redirect(f'/users/{g.user.id}')
+        return redirect(f'/projects/{project.id}')
 
     return render_template('projects/create.html', form=form)
 
@@ -529,7 +537,6 @@ def add_project():
 @login_required
 def project_details(project_id):
     """Show project details."""
-
     project = Project.query.get_or_404(project_id)
 
     return render_template('projects/details.html', project=project)
@@ -543,6 +550,10 @@ def edit_project(project_id):
     If form submission valid, update DB and redirect to user's profile"""
 
     project = Project.query.get_or_404(project_id)
+
+    if g.user.id != project.user_id:
+        flash('Unauthorized', 'danger')
+        return redirect("/")
 
     form = EditProjectForm(obj=project)
 
@@ -558,7 +569,7 @@ def edit_project(project_id):
         pass
     elif removeFieldListEntry(form.hooks):
         pass
-    elif g.user.id == project.user.id and form.validate_on_submit():
+    elif form.validate_on_submit():
         project.title = form.title.data or None
         project.pattern = form.pattern.data
         project.designer = form.designer.data
@@ -609,8 +620,8 @@ def delete_project(project_id):
 
     form = g.csrf_form
 
-    if g.user.id != project.user.id and not form.validate_on_submit():
-        flash('Unathorized', 'danger')
+    if g.user.id != project.user_id or not form.validate_on_submit():
+        flash('Unauthorized', 'danger')
         return redirect("/")
 
 
@@ -630,8 +641,8 @@ def pin_project(project_id):
 
     form = g.csrf_form
 
-    if g.user.id != project.user.id and not form.validate_on_submit():
-        flash('Unathorized', 'danger')
+    if g.user.id != project.user_id or not form.validate_on_submit():
+        flash('Unauthorized', 'danger')
         return redirect("/")
 
     project.pinned=True
@@ -652,8 +663,8 @@ def unpin_project(project_id):
 
     form = g.csrf_form
 
-    if g.user.id != project.user.id and not form.validate_on_submit():
-        flash('Unathorized', 'danger')
+    if g.user.id != project.user_id or not form.validate_on_submit():
+        flash('Unauthorized', 'danger')
         return redirect("/")
 
     project.pinned=False
@@ -680,7 +691,7 @@ def time_log_form():
         project = Project.query.get(project_id)
 
         if project.user_id != g.user.id:
-            flash('Unathorized', 'danger')
+            flash('Unauthorized', 'danger')
             return redirect("/")
 
         log = TimeLog(
@@ -710,7 +721,7 @@ def selected_project_time_log_form(project_id):
     project = Project.query.get(project_id)
 
     if project.user_id != g.user.id:
-        flash('Unathorized', 'danger')
+        flash('Unauthorized', 'danger')
         return redirect("/")
 
     form.project.choices = [(project.id, project.title)]
@@ -728,7 +739,7 @@ def edit_time_log(log_id):
     form = EditTimeLogForm(obj=log)
 
     if log.project.user_id != g.user.id:
-        flash('Unathorized', 'danger')
+        flash('Unauthorized', 'danger')
         return redirect("/")
 
     if form.validate_on_submit():
@@ -753,19 +764,155 @@ def edit_time_log(log_id):
 def conversations_page():
     """Display conversations page."""
 
-    conversation_ids = [
-        c.conversation_id for c
-        in Participant.query.filter(Participant.user_id == g.user.id)]
+    conversations = g.user.get_conversations()
 
-    conversations = db.session.query(
-        Conversation.id,
-        Participant.user_id
-        ).outerjoin(
-            Participant, Participant.user_id != g.user.id
-        ).filter(
-            Conversation.id in conversation_ids
+    return render_template('conversations/no_conversation_selected.html', conversations = conversations)
+
+@app.get('/conversations/<int:conversation_id>')
+@login_required
+def show_converation(conversation_id):
+    """Display conversation."""
+
+    form = MessageForm()
+
+    try:
+        Participant.query.filter(
+        Participant.user_id == g.user.id,
+        Participant.conversation_id == conversation_id
+        ).one()
+    except NoResultFound:
+        flash('Unauthorized', 'danger')
+        return redirect('/')
+
+    conversations = g.user.get_conversations()
+
+    participants = db.session.query(User).outerjoin(
+        Participant
+    ).filter(
+        Participant.conversation_id == conversation_id,
+        g.user.id != Participant.user_id
+    ).all()
+
+    messages = db.session.query(
+        Message.user_id,
+        Message.text
+    ).filter(
+        Message.conversation_id == conversation_id
+    ).all()
+
+    return render_template(
+        'conversations/conversation.html',
+        participants=participants,
+        conversation_id=conversation_id,
+        conversations=conversations,
+        messages=messages,
+        form=form
         )
-    # conversations = Conversation.query.filter(Conversation.id in conversation_ids)
 
-    return render_template('conversations/conversation_list.html', conversations = conversations)
+@app.post('/conversations/<int:conversation_id>/new_message')
+@login_required
+def send_message(conversation_id):
+    """Send new message."""
+
+    form = MessageForm()
+
+    try:
+        Participant.query.filter(
+        Participant.user_id == g.user.id,
+        Participant.conversation_id == conversation_id
+        ).one()
+
+    except NoResultFound:
+        flash('Unauthorized', 'danger')
+        return redirect('/')
+
+    if form.validate_on_submit():
+        message = Message(
+            user_id=g.user.id,
+            conversation_id=conversation_id,
+            text=form.message.data,
+        )
+
+        db.session.add(message)
+        db.session.commit()
+
+        return redirect(f'/conversations/{conversation_id}')
+
+    return render_template('conversations/conversation.html', form=form)
+
+@app.route('/conversations/new', methods=['POST', 'GET'])
+def new_conversation():
+    """Handle creating new conversation"""
+
+    conversations = g.user.get_conversations()
+
+    form = NewConversationForm()
+
+    form.user.choices = [(user.id, user.username) for user in User.query.filter(User.id != g.user.id).all()]
+
+    if form.validate_on_submit():
+        conversation = Conversation()
+        db.session.add(conversation)
+        db.session.commit()
+
+        user_id = form.user.data
+        user = User.query.get_or_404(user_id)
+        user.conversations.append(conversation)
+        g.user.conversations.append(conversation)
+        db.session.commit()
+
+        message = Message(
+            user_id = g.user.id,
+            conversation_id = conversation.id,
+            text = form.message.data
+        )
+        db.session.add(message)
+        db.session.commit()
+
+        return redirect(f'/conversations/{conversation.id}')
+
+    return render_template('conversations/new_conversation.html',  form= form, conversations=conversations)
+
+
+
+
+# @app.route('/conversations/new', methods=['POST', 'GET'])
+# def new_conversation():
+#     """Handle creating new conversation"""
+
+#     conversations = g.user.get_conversations()
+
+#     add_user_form = NewConversationForm()
+#     new_message_form = MessageForm()
+
+    # submit_message = True
+
+    # if add_user_form.add_user.data:
+    #     add_user_form.users.append_entry({})
+    #     submit_message = False
+    # elif removeFieldListEntry(add_user_form.users):
+    #     submit_message = False
+
+    # added_users = []
+
+    # for user_select in add_user_form.users.entries:
+    #     user_select.user.choices = [(user.id, user.username) for user in User.query.filter(User.id != g.user.id, User.id.not_in(added_users)).all()]
+    #     if (user_select.user.data):
+    #         # added_users.append(user_select.user.data)
+
+    # if submit_message:
+    #     if new_message_form.validate_on_submit():
+    #         conversation = Conversation()
+    #         db.session.add(conversation)
+    #         db.session.commit()
+
+    #         user = add_user_form.user.data
+    #         user.conversations.append(conversation)
+    #         g.user.conversations.append(conversation)
+    #         db.session.commit()
+
+    #         return redirect(f'/conversations/{conversation.id}')
+
+    # return render_template('conversations/new_conversation.html',  add_user_form= add_user_form, new_message_form=new_message_form, conversations=conversations)
+
 

@@ -11,23 +11,25 @@
   <link rel="stylesheet" href="/static/style.css">
 </head>
 
-<body>
+<body class="d-flex flex-column">
 
   <nav class="navbar navbar-expand-lg bg-body-tertiary mb-5">
-    <div class="container-fluid">
+    <div class="container d-flex justify-content-between">
+      <div class="navbar-nav">
       <a href="/" class="navbar-brand">
         Crafty
       </a>
-      <div class="navbar-nav">
+      <form class="d-flex me-5" role="search" action="/users">
+        <input class="form-control me-2" name="q" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      </form>
+    </div>
+      <div class="navbar-nav d-flex nav-right">
         {% if not g.user%}
         <a href="/signup" class="nav-link">Sign up</a>
         <a href="/login" class="nav-link">Log in</a>
         {% else %}
-        <form class="d-flex" role="search" action="/users">
-          <input class="form-control me-2" name="q" type="search" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
-        <a href="/notifications" class="btn btn-outline-secondary position-relative">
+        <a href="/notifications" class="nav-link">
           <i class="bi bi-bell"></i>
           {% if g.user.requests_received|length > 0 %}
           <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -35,11 +37,11 @@
             <span class="visually-hidden">new notifications</span>
             {% endif %}
           </a>
-          <a href="/conversations" class="btn btn-outline-secondary position-relative"><i class="bi bi-chat-dots"></i></a>
+          <a href="/conversations" class="nav-link position-relative"><i class="bi bi-chat-dots"></i></a>
         <a href="/profile" class="nav-link">Profile</a>
         <form action="/logout" method="POST">
           {{ g.csrf_form.hidden_tag() }}
-          <button type="submit" class="btn btn-outline-secondary">Log out</button>
+          <button type="submit" class="btn btn-link nav-link">Log out</button>
         </form>
         {% endif %}
       </div>
