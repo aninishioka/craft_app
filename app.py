@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from flask import Flask, g, redirect, render_template, session, flash, request
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from models import db, connect_db, User, Project, Needle, Hook, Yarn, TimeLog, Request, Participant, Message, Conversation
-from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm, EditProjectForm, ProjectTimeLogForm, EditTimeLogForm, EditUserForm, MessageForm, NewConversationForm
+from forms import CSRFProtectForm, SignupForm, LoginForm, NewProjectForm, EditProjectForm, ProjectTimeLogForm, EditTimeLogForm, EditUserForm, MessageForm, NewConversationForm, ProgressForm
 from functools import wraps
 from utils import removeFieldListEntry
 
@@ -496,7 +496,7 @@ def add_project():
             title = form.title.data or form.pattern.data or None,
             pattern = form.pattern.data,
             designer = form.designer.data,
-            content = form.content.data,
+            progress = form.progress.data
         )
 
         for needle in form.needles.entries:
@@ -537,7 +537,9 @@ def add_project():
 @login_required
 def project_details(project_id):
     """Show project details."""
+
     project = Project.query.get_or_404(project_id)
+    form = ProgressForm(obj=project)
 
     other_user = User.query.get_or_404(project.user_id)
 
@@ -545,7 +547,7 @@ def project_details(project_id):
         if g.user != other_user and not g.user.is_following(other_user):
             return render_template('users/private.html', user=other_user)
 
-    return render_template('projects/details.html', project=project)
+    return render_template('projects/details.html', project=project, form=form)
 
 
 @app.route('/projects/<int:project_id>/edit', methods=['GET', 'POST'])
@@ -579,7 +581,7 @@ def edit_project(project_id):
         project.title = form.title.data or None
         project.pattern = form.pattern.data
         project.designer = form.designer.data
-        project.content = form.content.data
+        project.progress = form.progress.data
 
         project.needles = []
         for needle in form.needles.entries:
@@ -616,6 +618,31 @@ def edit_project(project_id):
 
     return render_template('projects/edit.html', form=form, project_id=project.id)
 
+
+@app.post('/projects/<int:project_id>/edit_progress')
+@login_required
+def edit_project_progress(project_id):
+    """Handle editing project.
+        If GET, show form.
+        If form submission valid, update DB and redirect to user's profile"""
+
+    project = Project.query.get_or_404(project_id)
+
+    if g.user.id != project.user_id:
+        flash('Unauthorized', 'danger')
+        return redirect("/")
+
+    form = ProgressForm()
+
+    if form.validate_on_submit():
+        project.progress = form.progress.data
+
+        db.session.commit()
+
+        flash('Project progress edited.', 'success')
+        return redirect(f'/projects/{project_id}')
+
+    return render_template('projects/edit.html', project=project, form=form)
 
 @app.post('/projects/<int:project_id>/delete')
 @login_required

@@ -259,16 +259,16 @@ class Project(db.Model):
         default=''
     )
 
-    content = db.Column(
-        db.Text,
-        nullable=False,
-        default=''
-    )
-
     pinned = db.Column(
         db.Boolean,
         nullable=False,
         default=False
+    )
+
+    progress = db.Column(
+        db.String(100),
+        nullable=False,
+        default='In progress'
     )
 
     created_at = db.Column(

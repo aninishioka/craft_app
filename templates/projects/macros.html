@@ -19,7 +19,8 @@
       </form>
     </div>
     <div class="card-body">
-      <h5 class="card-title">{{ project.title }}</h5>
+      <h5 class="card-title ">{{ project.title }}</h5>
+      <h6 class="badge project-progress {{project.progress.lower().split(' ')|join('-')}}">{{ project.progress }}</h6>
       <a href="/projects/{{project.id}}" class="stretched-link"></a>
     </div>
   </div>
@@ -38,6 +39,7 @@
   <div class="card-body">
     Duration: {{ prettify_time(log.hours, log.minutes) }}
     <p class="card-text">Notes: {{ log.notes }}</p>
+    <div class="badge"></div>
   </div>
 </div>
 {% endmacro %}

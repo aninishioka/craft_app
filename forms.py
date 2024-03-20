@@ -131,6 +131,7 @@ class NeedleForm(Form):
 
     size = SelectField(
         'Needle size',
+        # TODO: assign choices dynamically from db
         choices=[
             ('US 00000000 - 0.5 mm', 'US 00000000 - 0.5 mm'),
             ('US 000000 - 0.75 mm', 'US 000000 - 0.75 mm'),
@@ -176,6 +177,7 @@ class HookForm(Form):
 
     size = SelectField(
         'Hook size',
+        # TODO: assign choices dynamically from db
         choices=[
             ('0.6 mm', '0.6 mm'),
             ('0.7 mm', '0.7 mm'),
@@ -231,6 +233,21 @@ class HookForm(Form):
     )
 
 
+class ProgressForm(FlaskForm):
+    """Form to change project progress status"""
+
+    progress = SelectField(
+        "Status",
+        choices=[
+            ('Not started', 'Not started'),
+            ('In progress', 'In progress'),
+            ('Completed', 'Completed'),
+            ('Frogged', 'Frogged'),
+        ],
+        validators=[Optional()]
+    )
+
+
 class NewProjectForm(FlaskForm):
     """Form to add new project."""
 
@@ -273,8 +290,14 @@ class NewProjectForm(FlaskForm):
         "Add yarn"
     )
 
-    content = TextAreaField(
-        "Notes",
+    progress = SelectField(
+        "Status",
+        choices=[
+            ('Not started', 'Not started'),
+            ('In progress', 'In progress'),
+            ('Completed', 'Completed'),
+            ('Frogged', 'Frogged'),
+        ],
         validators=[Optional()]
     )
 

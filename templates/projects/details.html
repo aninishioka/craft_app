@@ -16,13 +16,13 @@
       <i class="bi bi-pencil"></i> Log Time
     </button>
     {% if project.pinned %}
-      <button formaction="/projects/{{project.id}}/unpin" formmethod="POST" class="btn btn-primary">
-        <i class="bi bi-pin-angle-fill"></i> Unpin
-      </button>
-      {% else %}
-      <button formaction="/projects/{{project.id}}/pin"  formmethod="POST" class="btn btn-primary">
-        <i class="bi bi-pin-angle"></i> Pin
-      </button>
+    <button formaction="/projects/{{project.id}}/unpin" formmethod="POST" class="btn btn-primary">
+      <i class="bi bi-pin-angle-fill"></i> Unpin
+    </button>
+    {% else %}
+    <button formaction="/projects/{{project.id}}/pin" formmethod="POST" class="btn btn-primary">
+      <i class="bi bi-pin-angle"></i> Pin
+    </button>
     {% endif %}
     <button formaction="/projects/{{project.id}}/delete" formmethod="POST" class="btn btn-danger">
       <i class="bi bi-trash3"></i> Delete
@@ -35,59 +35,76 @@
   <h1 class="mt-3">{{ project.title }}</h1>
 
   {% if project.pattern %}
-    <h2 class="project-details-pattern">Pattern:
+  <h2 class="project-details-pattern">Pattern:
     {{ project.pattern }}
     {% if project.designer %} by {{ project.designer }} {% endif %}
-    </h2>
+    {% if g.user.id != project.user.id %}
+    <span class="badge ms-2 project-progress {{project.progress.lower().split(' ')|join('-')}}">
+      {{project.progress}}
+    </span>
+    {% endif %}
+  </h2>
+  {% endif %}
+
+  {% if g.user.id == project.user.id %}
+  <form action="/projects/{{project.id}}/edit_progress" method="POST" class="mt-3">
+    {{ form.hidden_tag() }}
+
+    {% for field in form if field.widget.input_type != 'hidden' %}
+    {% for error in field.errors %}
+    <span class="text-danger">{{ error }}</span>
+    {% endfor %}
+    {{ field(placeholder=field.label.text, class="form-select mb-1") }}
+    {% endfor %}
+
+    <button type="submit" class="btn btn-secondary">Save</button>
+  </form>
   {% endif %}
 
   {% if project.yarns or project.needles or project.yarns %}
-    {% if project.needles %}
-      <h2>Needles</h2>
-      {% for needle in project.needles %}
-        {{ needle.size }}
-        {% if not loop.last %}
-          <br>
-        {% endif %}
-      {% endfor %}
+  {% if project.needles %}
+  <h2>Needles</h2>
+  {% for needle in project.needles %}
+  {{ needle.size }}
+  {% if not loop.last %}
+  <br>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+  {% if project.hooks %}
+  <h2>Hooks</h2>
+  {% for hook in project.hooks %}
+  {{ hook.size }}
+  {% if not loop.last %}
+  <br>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+  {% if project.yarns %}
+  <h2>Yarns</h2>
+  {% for yarn in project.yarns %}
+  <div class="yarn">
+    Yarn: {{ yarn.yarn_name }}
+    <br>
+    Color: {{ yarn.color }}
+    <br>
+    {% if yarn.num_skeins and (yarn.skein_weight or yarn.skein_length) %}
+    Amount: {{ yarn.num_skeins }} =
+    {{ (yarn.num_skeins or 0) * (yarn.skein_length or 0) }} {{ yarn.skein_length_unit}} /
+    {{ (yarn.num_skeins or 0) * (yarn.skein_weight or 0) }} {{ yarn.skein_weight_unit}}
     {% endif %}
-    {% if project.hooks %}
-      <h2>Hooks</h2>
-      {% for hook in project.hooks %}
-        {{ hook.size }}
-        {% if not loop.last %}
-          <br>
-        {% endif %}
-      {% endfor %}
+    {% if not loop.last %}
+    <br>
     {% endif %}
-    {% if project.yarns %}
-      <h2>Yarns</h2>
-      {% for yarn in project.yarns %}
-      <div class="yarn">
-        Yarn: {{ yarn.yarn_name }}
-        <br>
-        Color: {{ yarn.color }}
-        <br>
-        {% if yarn.num_skeins and (yarn.skein_weight or yarn.skein_length) %}
-          Amount: {{ yarn.num_skeins }} =
-          {{ (yarn.num_skeins or 0) * (yarn.skein_length or 0) }} {{ yarn.skein_length_unit}} /
-          {{ (yarn.num_skeins or 0) * (yarn.skein_weight or 0) }} {{ yarn.skein_weight_unit}}
-        {% endif %}
-        {% if not loop.last %}
-          <br>
-        {% endif %}
-      </div>
-      {% endfor %}
-    {% endif %}
+  </div>
+  {% endfor %}
+  {% endif %}
   {% endif %}
 
   <h2>Logs:</h2>
   {% for log in project.time_logs %}
-      {{ create_log_card(log) }}
+  {{ create_log_card(log) }}
   {% endfor %}
-
-  <h2>Notes:</h2>
-  <p>{{ project.content }}</p>
 </div>
 
 {% endblock %}

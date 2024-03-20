@@ -27,6 +27,26 @@ body {
 
 /* ==================== Project cards */
 
+.project-progress {
+  color: rgb(50, 48, 44);
+}
+
+.not-started {
+  background: rgb(227, 226, 224);
+}
+
+.in-progress {
+  background: rgb(211, 229, 239);
+}
+
+.completed {
+  background: rgb(219, 237, 219);
+}
+
+.frogged {
+  background: rgb(250, 222, 201);
+}
+
 /* ==================== Project details */
 
 .project-details h1 {
