@@ -19,7 +19,6 @@ Crafty is an online crafting platform where users can keep track of project prog
 This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
 
 * [![Flask][Flask.com]][Flask-url]
-* [![React][React.js]][React-url]
 * [![SQLAlchemy][SQLAlchemy.com]][SQLAlchemy-url]
 * [![PostgreSQL][PostgreSQL.com]][PostgreSQL-url]
 * [![Jinja][Jinja.com]][Jinja-url]
