@@ -9,7 +9,7 @@ Crafty is an online crafting platform where users can keep track of project prog
 * __Authentication__: Users can sign up, log in, and log out. Passwords are hashed with bcrypt.
 * __Authorization__: Protect routes so only authorized users can view. E.g. restrict profile view for accounts that are private.
 * __Projects__: Authenticated users can add projects as well as log time spent on each project.
-* * __Private accounts__: Authenticated users can choose to make their accounts private to restrict access to their profile.
+* __Private accounts__: Authenticated users can choose to make their accounts private to restrict access to their profile.
 * __Follows & Requests__: Authenticated users can view projects from users they are following. If a user is private, a follow request will be created.
 * __Profile management__: Authenticated users can edit account information.
 
